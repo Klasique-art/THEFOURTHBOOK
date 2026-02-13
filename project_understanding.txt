@@ -1,0 +1,78 @@
+
+Project Understanding & Feature Confirmation Document
+
+1. Purpose of This Document
+
+This document is intended to confirm my understanding of the proposed application idea and its core functionality. Its purpose is to ensure that both parties are fully aligned on the concept, scope, and expectations before development begins. Please review this document carefully and confirm that it accurately reflects your vision for the application.
+
+2. Core Concept Overview
+
+The proposed application is a monthly participation-based platform targeted at diaspora users. Users will be able to register on the app and participate by paying a fixed monthly participation fee of $20.
+
+At the end of each monthly cycle, ten (10) users will be randomly selected from the pool of users who have successfully paid for that specific month. The total amount collected from all participating users during that month will be distributed equally among the ten selected users.
+
+This process repeats every month, with each month treated as a new and independent cycle, provided users continue to make their monthly payments.
+
+Example Scenario:
+If 50,000 users pay $20 each in a given month, the total pooled amount will be $1,000,000. Ten randomly selected users will each receive $100,000. The following month begins a new cycle, and all paying users are once again eligible for selection.
+
+3. Participation Rules (As Understood)
+
+Only users who have successfully completed payment for the current month will be eligible for selection in that month’s draw. The selection process will be fully automated and random.
+
+Unless otherwise specified, a user may be selected as a winner more than once across different months. Monthly payments are recurring unless the user cancels.
+
+Please confirm whether users are allowed to win multiple times over different months and whether any restrictions or exclusions should apply after a user has won.
+
+4. Key Functional Features Required
+
+To effectively support this system, the following core features are required.
+
+User Accounts:
+User registration and login
+Optional identity verification 
+User profile dashboard showing payment status, participation history, and win history (if applicable)
+
+Payments:
+Monthly recurring payment setup of $20
+Secure payment processing through a third-party provider
+Automatic payment reminders
+Handling of failed payments, including retries and grace periods
+Clear transaction history visible to users
+
+Random Selection System:
+1.Automated random selection process
+2.Transparent and auditable selection logic
+3.Timestamped and logged draw results
+4.Admin access to view and verify selection outcomes
+
+Payout Management:
+1.Secure payout processing for winners
+2.Payout status tracking (pending, processing, completed)
+3.Payout history for each user
+4.Admin controls to monitor or approve payouts
+
+Transparency and Trust Features:
+1.Monthly summaries displaying total participants, total pooled amount, and number of winners
+2.Public or semi-public display of draw results using anonymized user identifiers
+3.Clear explanation within the app of how random selection works
+
+5. Admin and Management Features
+
+An administrative dashboard will be required to manage users, monitor payments, oversee monthly draws, track payouts, detect potential fraud, and view system logs and audit trails. Manual administrative overrides may be included if required.
+
+6. Notifications and Communication
+
+The app should support email and/or in-app notifications for successful payments, payment failures, monthly draw results, winning notifications, and official announcements or updates from the platform administrators.
+
+7. Legal and Compliance Considerations
+
+Depending on the regions and jurisdictions involved, the platform may require clear terms and conditions, participation disclaimers, age restrictions, and compliance with applicable financial or gaming regulations. Please confirm whether legal consultation and compliance guidance will be provided by your team or expected as part of the development scope.
+
+8. Assumptions Made
+
+Unless otherwise clarified, it is assumed that the application will be developed as a mobile-first platform, payments will be handled through a third-party payment provider, random selection will be system-driven and not manual, and each monthly cycle will reset independently.
+
+9. Confirmation and Next Steps
+
+Please confirm in writing that this document accurately represents your intended product, that any required changes or clarifications are communicated before development begins, and that upon confirmation development can commence.

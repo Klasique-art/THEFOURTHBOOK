@@ -3,16 +3,16 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { useColors } from '@/config/colors';
 
-export default function HomeScreen() {
+export default function DashboardScreen() {
     const colors = useColors();
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Text style={[styles.title, { color: colors.textPrimary }]}>
-                Home
+                Dashboard
             </Text>
             <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                There Is Power, Real Power In Numbers!
+                Your participation hub
             </Text>
         </View>
     );
