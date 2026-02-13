@@ -49,7 +49,97 @@ The Fourth Book uses a warm, culturally-rich color palette inspired by Pan-Afric
 - Small Text: 14px
 - Caption: 12px
 
-### Design Principles
+### Voice & Tone (CRITICAL)
+
+**This is a COMMUNITY app. The app should speak TO members, not AT them.**
+
+The Fourth Book is built by the community, for the community. Every piece of text should make members feel like they're part of something bigger - a movement, a family, a collective force for change.
+
+**Core Principles:**
+
+1. **We, Not You**
+   - ✅ "Together, we're building something powerful"
+   - ✅ "Our community is growing stronger every day"
+   - ❌ "You can contribute to the pool"
+   - ❌ "Your membership helps others"
+
+2. **Empowering & Motivational**
+   - ✅ "There Is Power, Real Power In Numbers!"
+   - ✅ "We're almost there! Just 17,550 more members until we activate monthly payouts!"
+   - ✅ "Together, we've already changed 15 lives. Who's next?"
+   - ❌ "Membership target not reached"
+   - ❌ "15 winners selected"
+
+3. **Inclusive & Warm**
+   - ✅ "Welcome back, family!"
+   - ✅ "Your contribution strengthens our collective"
+   - ✅ "Every member counts. You count."
+   - ❌ "User dashboard"
+   - ❌ "Account overview"
+
+4. **Celebratory & Positive**
+   - ✅ "🎉 Congratulations to our latest winners!"
+   - ✅ "Amazing! Our community just hit 30,000 members!"
+   - ✅ "Your next contribution brings us closer to our goal"
+   - ❌ "Payment successful"
+   - ❌ "Transaction completed"
+
+5. **Transparent & Honest**
+   - ✅ "We need 50,000 members before monthly payouts begin. Here's why..."
+   - ✅ "Your contribution goes directly into our collective pool"
+   - ✅ "Every draw is fair, transparent, and randomly selected"
+   - ❌ "Terms and conditions apply"
+   - ❌ "Subject to verification"
+
+**Language Examples:**
+
+**Greetings:**
+- "Good morning, [Name]! Ready to make today count?"
+- "Welcome back, family!"
+- "Hello, [Name]! Our community is stronger with you here"
+
+**Progress Messages:**
+- "We're 64% there! Together, we can reach 50,000 members"
+- "Your contribution this month strengthens our collective power"
+- "Almost there! Just [X] more members until we activate payouts"
+
+**Success Messages:**
+- "🎉 Congratulations! You're now part of this month's draw"
+- "Amazing! Your contribution is in. Together, we're unstoppable"
+- "Yes! Our community just welcomed member #[X]"
+
+**Empty States:**
+- "Be the first to contribute this month and inspire others!"
+- "No winners yet, but that could change with the next draw. Will it be you?"
+- "Your journey with us starts here. Ready to take the first step?"
+
+**Error Messages:**
+- "Oops! Something didn't go as planned. Let's try that again together"
+- "We couldn't process that right now. Our team is on it!"
+- "Hold on! We need to verify a few details before we continue"
+
+**Call-to-Actions:**
+- "Join the Movement" (not "Sign Up")
+- "Make Your Contribution" (not "Pay Now")
+- "Invite Your Circle" (not "Refer Friends")
+- "See Our Winners" (not "View Results")
+- "Strengthen Our Collective" (not "Add Funds")
+
+**Notifications:**
+- "🎊 Big news! The draw is happening in 24 hours!"
+- "Your contribution window closes soon. Don't miss out!"
+- "Someone in our community just won $200,000. Next month, it could be you!"
+
+**Rules:**
+1. **Always use "we", "our", "us"** when referring to the community
+2. **Use "you" sparingly** - only when addressing individual actions
+3. **Add emojis thoughtfully** - celebrate wins, mark milestones, show warmth
+4. **Be conversational** - write like you're talking to a friend
+5. **Show the impact** - "Together, we've distributed $3M" not "Total payouts: $3M"
+6. **Inspire action** - every message should motivate or encourage
+7. **Celebrate milestones** - acknowledge progress, big and small
+
+## Design Principles
 
 1. **Cultural Authenticity**
    - Pan-African color scheme (red, yellow, green in logo)
@@ -225,6 +315,137 @@ Learn coding patterns, structure, and conventions from:
    ```
 
 **Never blindly run install commands without verification.**
+
+## Git Workflow Guidelines
+
+### Pushing Changes to GitHub
+
+**When the user says "push changes to github", automatically run all git commands without waiting for approval.**
+
+**Standard workflow:**
+```bash
+# 1. Check status (safe to auto-run)
+git status
+
+# 2. Stage all changes (safe to auto-run)
+git add .
+
+# 3. Commit with descriptive message (REQUIRES USER APPROVAL)
+git commit -m "feat: descriptive commit message"
+
+# 4. Push to remote (REQUIRES USER APPROVAL)
+git push
+```
+
+**Commit Message Format:**
+- Use conventional commits: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`
+- Be descriptive and concise
+- Include what was changed and why
+- Example: `feat: implement animated tab bar with dark mode support`
+
+**Auto-run Rules:**
+- `git status` - Always safe to auto-run
+- `git add .` - Always safe to auto-run
+- `git commit` - Requires user approval (SafeToAutoRun: false)
+- `git push` - Requires user approval (SafeToAutoRun: false)
+
+**When user says "push changes to github":**
+1. Run `git status` (auto)
+2. Run `git add .` (auto)
+3. Run `git commit -m "..."` (wait for approval)
+4. Run `git push` (wait for approval)
+
+## Barrel Export Pattern (CRITICAL)
+
+**ALWAYS use barrel exports (index.ts files) for cleaner imports.**
+
+### What are Barrel Exports?
+
+Barrel exports consolidate multiple exports from a directory into a single `index.ts` file, allowing cleaner imports.
+
+### Implementation
+
+**Create `index.ts` in each major directory:**
+
+1. **components/index.ts**:
+```typescript
+// UI Components
+export { default as AppBottomSheet } from './ui/AppBottomSheet';
+export { default as AppButton } from './ui/AppButton';
+export { default as AppSwitch } from './ui/AppSwitch';
+export { default as AppText } from './ui/AppText';
+export { default as ConfirmAction } from './ui/ConfirmAction';
+export { default as Nav } from './ui/Nav';
+export { default as Screen } from './ui/Screen';
+
+// Layout Components
+export { default as CustomTabBar } from './layout/CustomTabBar';
+
+// Re-export types
+export type { AppBottomSheetRef } from './ui/AppBottomSheet';
+```
+
+2. **context/index.ts**:
+```typescript
+// Theme Context
+export { ThemeProvider, useTheme } from './ThemeContext';
+export type { Theme } from './ThemeContext';
+
+// Add other contexts as they're created
+// export { AuthProvider, useAuth } from './AuthContext';
+```
+
+3. **config/index.ts**:
+```typescript
+// Color utilities
+export { useColors, lightColors, darkColors } from './colors';
+export type { Theme } from './colors';
+```
+
+4. **hooks/index.ts** (when created):
+```typescript
+// Custom hooks
+export { default as useDebounce } from './useDebounce';
+export { default as useModal } from './useModal';
+// etc.
+```
+
+### Usage Examples
+
+**Before (without barrel exports):**
+```typescript
+import AppButton from '@/components/ui/AppButton';
+import AppText from '@/components/ui/AppText';
+import Screen from '@/components/ui/Screen';
+import { useTheme } from '@/context/ThemeContext';
+import { useColors } from '@/config/colors';
+```
+
+**After (with barrel exports):**
+```typescript
+import { AppButton, AppText, Screen } from '@/components';
+import { useTheme } from '@/context';
+import { useColors } from '@/config';
+```
+
+### Rules
+
+1. **Always create/update index.ts** when adding new components, hooks, or contexts
+2. **Export both default exports and named exports** as appropriate
+3. **Re-export types** that are needed by consumers
+4. **Group exports logically** with comments (UI Components, Layout Components, etc.)
+5. **Update barrel exports immediately** when creating new files
+
+### When to Create Barrel Exports
+
+- ✅ `components/` - For all UI and layout components
+- ✅ `context/` - For all context providers and hooks
+- ✅ `config/` - For configuration utilities
+- ✅ `hooks/` - For custom hooks (when directory exists)
+- ✅ `utils/` - For utility functions (when directory exists)
+- ✅ `types/` - For TypeScript types (when directory exists)
+- ❌ `app/` - Do NOT create barrel exports (Expo Router uses file-based routing)
+- ❌ `lib/` - Usually not needed (API services imported individually)
 
 ## Documentation References
 Backend API documentation located at:
@@ -403,6 +624,187 @@ const MyComponent = () => {
   );
 };
 ```
+
+### Screen Component Wrapper (CRITICAL)
+
+**ALL screens MUST be wrapped in the `Screen` component.**
+
+**Location**: `components/ui/Screen.tsx`
+
+The `Screen` component provides:
+- ✅ **Theme-aware backgrounds** - Automatically uses correct background color for light/dark mode
+- ✅ **Safe area handling** - Respects device notches, status bars, and navigation bars
+- ✅ **Status bar configuration** - Auto-configures status bar style based on theme
+- ✅ **Consistent padding** - Applies standard horizontal padding (`px-4`)
+
+**Usage**:
+```typescript
+import Screen from '@/components/ui/Screen';
+
+const MyScreen = () => {
+  return (
+    <Screen>
+      {/* Your screen content here */}
+      <View>
+        <Text>Content automatically gets theme colors and safe area</Text>
+      </View>
+    </Screen>
+  );
+};
+```
+
+**With Custom Status Bar**:
+```typescript
+<Screen 
+  statusBarStyle="light-content" 
+  statusBarBg="#000000"
+  className="px-0" // Override default padding if needed
+>
+  {/* Your content */}
+</Screen>
+```
+
+**Why This Matters**:
+- ❌ **Without Screen**: Manual theme handling, safe area issues, inconsistent status bars
+- ✅ **With Screen**: Automatic theme support, safe areas handled, consistent UX
+
+**Rule**: Every file in `app/` directory (screens/routes) MUST use the `Screen` wrapper as the root component.
+
+### Keep Screen Files Minimal (CRITICAL)
+
+**NEVER flood screen files with component code. Extract components into the `components/` folder.**
+
+Screen files in the `app/` directory should be **minimal orchestration layers** that:
+- Import and compose components
+- Manage screen-level state and data fetching
+- Handle navigation and routing logic
+- Coordinate component interactions
+
+**Bad Example** (Everything in screen file):
+```typescript
+// ❌ app/(tabs)/discover.tsx - TOO MUCH CODE
+const DiscoverScreen = () => {
+  return (
+    <Screen>
+      <View className="flex-row items-center justify-between px-4 py-3">
+        <Text className="text-2xl font-bold">Discover</Text>
+        <TouchableOpacity onPress={handleFilter}>
+          <Icon name="filter" size={24} />
+        </TouchableOpacity>
+      </View>
+      
+      <View className="px-4 py-2">
+        <TextInput placeholder="Search..." />
+      </View>
+      
+      <FlashList
+        data={profiles}
+        renderItem={({ item }) => (
+          <View className="bg-white rounded-lg p-4 mb-3">
+            <Image source={{ uri: item.photo }} />
+            <Text className="font-bold">{item.name}</Text>
+            <Text>{item.bio}</Text>
+            {/* 50+ more lines of card UI */}
+          </View>
+        )}
+      />
+    </Screen>
+  );
+};
+```
+
+**Good Example** (Components extracted):
+```typescript
+// ✅ app/(tabs)/discover.tsx - CLEAN AND MINIMAL
+import { FlashList } from '@shopify/flash-list';
+import { useState, useCallback } from 'react';
+
+import {
+  DiscoverHeader,
+  DiscoverSearchBar,
+  DiscoveryProfileCard,
+  DiscoverFiltersModal,
+  EmptyState,
+} from '@/components/discover';
+import Screen from '@/components/ui/Screen';
+import { useColors } from '@/config';
+
+const DiscoverScreen = () => {
+  const colors = useColors();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [profiles, setProfiles] = useState([]);
+
+  const handleLike = useCallback((profileId: string) => {
+    // Like logic
+  }, []);
+
+  return (
+    <Screen>
+      <DiscoverHeader 
+        onFilterPress={() => setShowFilters(true)}
+        onSearchPress={() => {/* ... */}}
+      />
+      
+      <DiscoverSearchBar 
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
+      
+      <FlashList
+        data={profiles}
+        renderItem={({ item }) => (
+          <DiscoveryProfileCard 
+            profile={item}
+            onLike={handleLike}
+          />
+        )}
+        ListEmptyComponent={<EmptyState type="no-profiles" />}
+      />
+      
+      <DiscoverFiltersModal 
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+      />
+    </Screen>
+  );
+};
+
+export default DiscoverScreen;
+```
+
+**Component Organization**:
+
+```
+components/
+  discover/                    # Feature-specific components
+    DiscoverHeader.tsx         # Header with filter/search buttons
+    DiscoverSearchBar.tsx      # Search input component
+    DiscoveryProfileCard.tsx   # Profile card in list
+    DiscoverFiltersModal.tsx   # Filters bottom sheet
+    EmptyState.tsx             # Empty state component
+    index.ts                   # Barrel export
+  
+  ui/                          # Reusable UI components
+    Screen.tsx
+    AppButton.tsx
+    AppText.tsx
+    ...
+```
+
+**Benefits**:
+- ✅ **Readability**: Screen files are easy to understand at a glance
+- ✅ **Reusability**: Components can be used across multiple screens
+- ✅ **Testability**: Individual components are easier to test
+- ✅ **Maintainability**: Changes to UI don't clutter screen logic
+- ✅ **Collaboration**: Multiple developers can work on different components
+
+**Rules**:
+1. **Screen files should be < 200 lines** - If longer, extract components
+2. **Create feature folders** - Group related components (e.g., `components/discover/`, `components/wallet/`)
+3. **Use barrel exports** - Create `index.ts` in feature folders for clean imports
+4. **One component per file** - Don't define multiple components in screen files
+5. **Extract early** - Don't wait until the screen is messy, extract from the start
 
 ## Performance Optimization (CRITICAL)
 

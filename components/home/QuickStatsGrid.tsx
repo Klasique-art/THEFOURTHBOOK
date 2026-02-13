@@ -1,0 +1,116 @@
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { Text, View } from 'react-native';
+
+import { useColors } from '@/config';
+
+interface StatCardProps {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    value: string;
+    trend?: {
+        direction: 'up' | 'down';
+        percentage: string;
+    };
+}
+
+const StatCard = ({ icon, label, value, trend }: StatCardProps) => {
+    const colors = useColors();
+
+    return (
+        <View
+            className="flex-1 rounded-xl p-4"
+            style={{ backgroundColor: colors.backgroundAlt }}
+        >
+            <View
+                className="w-10 h-10 rounded-full items-center justify-center mb-3"
+                style={{ backgroundColor: colors.accent50 }}
+            >
+                <Ionicons name={icon} size={20} color={colors.white} />
+            </View>
+
+            <Text
+                className="text-2xl font-bold mb-1"
+                style={{ color: colors.textPrimary }}
+            >
+                {value}
+            </Text>
+
+            <Text
+                className="text-xs mb-2"
+                style={{ color: colors.textSecondary }}
+            >
+                {label}
+            </Text>
+
+            {trend && (
+                <View className="flex-row items-center">
+                    <Ionicons
+                        name={trend.direction === 'up' ? 'trending-up' : 'trending-down'}
+                        size={12}
+                        color={trend.direction === 'up' ? colors.success : colors.error}
+                    />
+                    <Text
+                        className="text-xs ml-1"
+                        style={{
+                            color: trend.direction === 'up' ? colors.success : colors.error
+                        }}
+                    >
+                        {trend.percentage}
+                    </Text>
+                </View>
+            )}
+        </View>
+    );
+};
+
+interface QuickStatsGridProps {
+    totalContributions: string;
+    yourContributions: number;
+    totalWinners: number;
+    nextDrawDate: string;
+}
+
+const QuickStatsGrid = ({
+    totalContributions,
+    yourContributions,
+    totalWinners,
+    nextDrawDate
+}: QuickStatsGridProps) => {
+    return (
+        <View className="mb-6">
+            <Text className="text-lg font-bold mb-3" style={{ color: '#571217' }}>
+                Quick Stats
+            </Text>
+
+            <View className="flex-row gap-3 mb-3">
+                <StatCard
+                    icon="cash-outline"
+                    label="Total Pool"
+                    value={totalContributions}
+                    trend={{ direction: 'up', percentage: '+12%' }}
+                />
+                <StatCard
+                    icon="wallet-outline"
+                    label="Your Contributions"
+                    value={yourContributions.toString()}
+                />
+            </View>
+
+            <View className="flex-row gap-3">
+                <StatCard
+                    icon="trophy-outline"
+                    label="Total Winners"
+                    value={totalWinners.toString()}
+                />
+                <StatCard
+                    icon="calendar-outline"
+                    label="Next Draw"
+                    value={nextDrawDate}
+                />
+            </View>
+        </View>
+    );
+};
+
+export default QuickStatsGrid;
