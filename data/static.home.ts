@@ -15,50 +15,29 @@ export const homeQuickActions: QuickAction[] = [
         id: '1',
         icon: 'wallet',
         label: 'Make Your Contribution',
-        route: '/(tabs)/wallet',
+        route: '/wallet',
         color: '#F38218', // accent
-    },
-    {
-        id: '2',
-        icon: 'trophy',
-        label: 'See Our Winners',
-        route: '/(tabs)/draws',
-        color: '#F8B735', // warning/yellow
     },
     {
         id: '3',
         icon: 'people',
         label: 'Invite Your Circle',
         action: 'share',
-        color: '#1A760D', // success/green
+        color: '#0f0', // success/green
     },
     {
         id: '4',
         icon: 'card',
         label: 'Payment Methods',
-        route: '/(tabs)/wallet',
-        color: '#040F40', // info/blue
-    },
-    {
-        id: '5',
-        icon: 'stats-chart',
-        label: 'Your Impact',
-        route: '/(tabs)/profile',
-        color: '#571217', // primary
-    },
-    {
-        id: '6',
-        icon: 'gift',
-        label: 'Share Your Code',
-        action: 'referral',
-        color: '#F38218', // accent
+        route: '/wallet',
+        color: '#0ff', // info/blue
     },
     {
         id: '7',
         icon: 'help-circle',
         label: 'How We Work',
-        action: 'how_it_works',
-        color: '#666666', // textSecondary
+        route: 'how_it_works',
+        color: '#eee', // textSecondary
     },
     {
         id: '8',

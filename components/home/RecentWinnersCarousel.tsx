@@ -1,18 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, Text, View } from 'react-native';
+import { Dimensions, View } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 
 import { useColors } from '@/config';
 import { DrawWinner } from '@/data/dummy.draws';
 
+
+import AppText from '@/components/ui/AppText';
 interface RecentWinnersCarouselProps {
     winners: DrawWinner[];
 }
 
 const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
     const colors = useColors();
-    const width = Dimensions.get('window').width - 32; // Account for padding
+    const width = Dimensions.get('window').width; // Account for padding
 
     const WinnerCard = ({ winner }: { winner: DrawWinner }) => {
         const formattedAmount = `$${winner.prize_amount.toLocaleString()}`;
@@ -25,7 +27,7 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
                 className="rounded-2xl p-5 mr-3"
                 style={{
                     backgroundColor: colors.backgroundAlt,
-                    width: width * 0.85,
+                    width: width * 0.90,
                 }}
             >
                 <View className="flex-row items-center mb-4">
@@ -36,12 +38,12 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
                         <Ionicons name="person" size={32} color={colors.accent} />
                     </View>
                     <View className="flex-1 ml-3">
-                        <Text
+                        <AppText
                             className="text-lg font-bold mb-1"
                             style={{ color: colors.textPrimary }}
                         >
                             {winner.user_identifier}
-                        </Text>
+                        </AppText>
                         <View className="flex-row items-center">
                             <View
                                 className="px-2 py-1 rounded-full"
@@ -51,7 +53,7 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
                                         : colors.warning + '20'
                                 }}
                             >
-                                <Text
+                                <AppText
                                     className="text-xs font-bold uppercase"
                                     style={{
                                         color: winner.payout_status === 'completed'
@@ -60,7 +62,7 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
                                     }}
                                 >
                                     {winner.payout_status}
-                                </Text>
+                                </AppText>
                             </View>
                         </View>
                     </View>
@@ -76,26 +78,26 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
                     className="rounded-xl p-4"
                     style={{ backgroundColor: colors.accent50 }}
                 >
-                    <Text
+                    <AppText
                         className="text-sm mb-2"
-                        style={{ color: colors.primary }}
+                        style={{ color: colors.textPrimary }}
                     >
                         Prize Amount
-                    </Text>
-                    <Text
+                    </AppText>
+                    <AppText
                         className="text-3xl font-bold mb-1"
-                        style={{ color: colors.success }}
+                        color='#0f0'
                     >
                         {formattedAmount}
-                    </Text>
+                    </AppText>
                     <View className="flex-row items-center">
                         <Ionicons name="calendar-outline" size={12} color={colors.white} />
-                        <Text
+                        <AppText
                             className="text-xs ml-1"
                             style={{ color: colors.white }}
                         >
                             {formattedDate}
-                        </Text>
+                        </AppText>
                     </View>
                 </View>
             </View>
@@ -105,23 +107,23 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
     if (winners.length === 0) {
         return (
             <View className="mb-6">
-                <Text
+                <AppText
                     className="text-lg font-bold mb-3"
                     style={{ color: colors.textPrimary }}
                 >
                     Our Recent Winners
-                </Text>
+                </AppText>
                 <View
                     className="rounded-2xl p-8 items-center"
                     style={{ backgroundColor: colors.backgroundAlt }}
                 >
                     <Ionicons name="trophy-outline" size={48} color={colors.textSecondary} />
-                    <Text
+                    <AppText
                         className="text-center mt-3"
                         style={{ color: colors.textSecondary }}
                     >
                         No winners yet, but that could change with the next draw. Will it be you?
-                    </Text>
+                    </AppText>
                 </View>
             </View>
         );
@@ -130,18 +132,18 @@ const RecentWinnersCarousel = ({ winners }: RecentWinnersCarouselProps) => {
     return (
         <View className="mb-6">
             <View className="flex-row items-center justify-between mb-3 px-1">
-                <Text
+                <AppText
                     className="text-lg font-bold"
                     style={{ color: colors.textPrimary }}
                 >
                     Celebrating Our Winners
-                </Text>
-                <Text
+                </AppText>
+                <AppText
                     className="text-xs"
                     style={{ color: colors.textSecondary }}
                 >
                     {winners.length} lives changed
-                </Text>
+                </AppText>
             </View>
 
             <Carousel

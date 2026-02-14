@@ -1,84 +1,140 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 
-import { useColors } from '@/config/colors';
-import { useTheme } from '@/context/ThemeContext';
+import { AppBottomSheet, type AppBottomSheetRef, AppModal, ConfirmAction, Screen } from '@/components';
+import { ProfileHeader, SettingsList } from '@/components/profile';
+import AppText from '@/components/ui/AppText';
+import { useColors } from '@/config';
+import { mockCurrentUser } from '@/data/userData.dummy';
 
 export default function ProfileScreen() {
     const colors = useColors();
-    const { theme, toggleTheme } = useTheme();
+    const [selectedLanguage, setSelectedLanguage] = useState('English');
+    const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+    const logoutSheetRef = useRef<AppBottomSheetRef>(null);
+
+    const languageOptions = useMemo(() => ['English', 'French', 'Spanish'], []);
+
+    const accountSettings = [
+        { id: 'account', label: 'Account Details', icon: 'person-outline', route: '/settings/account' },
+        { id: 'notifications', label: 'Notifications', icon: 'notifications-outline', route: '/notifications' },
+    ];
+
+    const appSettings = [
+        { id: 'appearance', label: 'Appearance', icon: 'color-palette-outline', route: '/settings/appearance' },
+        { id: 'security', label: 'Security', icon: 'lock-closed-outline', route: '/settings/security' },
+        {
+            id: 'language',
+            label: 'Language',
+            icon: 'globe-outline',
+            value: selectedLanguage,
+            action: () => setIsLanguageModalVisible(true)
+        },
+    ];
+
+    const supportSettings = [
+        { id: 'help', label: 'Help & Support', icon: 'help-circle-outline', route: '/settings/support' },
+        { id: 'about', label: 'About App', icon: 'information-circle-outline', route: '/settings/about' },
+    ];
+
+    const handleLogout = () => {
+        logoutSheetRef.current?.open();
+    };
+
+    const handleLogoutCancel = () => {
+        logoutSheetRef.current?.close();
+    };
+
+    const handleLogoutConfirm = () => {
+        console.log('Logging out...');
+        logoutSheetRef.current?.close();
+    };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-                Profile
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Your account settings
-            </Text>
+        <Screen>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+                <View className="pt-2">
+                    <ProfileHeader
+                        name={`${mockCurrentUser.first_name} ${mockCurrentUser.last_name}`}
+                        email={mockCurrentUser.email}
+                        joinDate={mockCurrentUser.created_at}
+                        isVerified={mockCurrentUser.kyc_status === 'verified'}
+                    />
 
-            {/* Theme Toggle Button */}
-            <TouchableOpacity
-                style={[styles.themeButton, {
-                    backgroundColor: colors.accent,
-                    shadowColor: colors.primary,
-                }]}
-                onPress={toggleTheme}
-                activeOpacity={0.8}
+                    <SettingsList title="Account" items={accountSettings as any} />
+                    <SettingsList title="App Settings" items={appSettings as any} />
+                    <SettingsList title="Support" items={supportSettings as any} />
+
+                    <SettingsList
+                        items={[
+                            {
+                                id: 'logout',
+                                label: 'Log Out',
+                                icon: 'log-out-outline',
+                                action: handleLogout,
+                                isDestructive: true
+                            }
+                        ] as any}
+                    />
+                </View>
+            </ScrollView>
+
+            <AppModal
+                visible={isLanguageModalVisible}
+                onClose={() => setIsLanguageModalVisible(false)}
+                title="Select Language"
             >
-                <Ionicons
-                    name={theme === 'dark' ? 'sunny' : 'moon'}
-                    size={24}
-                    color={colors.white}
-                />
-                <Text style={[styles.buttonText, { color: colors.white }]}>
-                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                </Text>
-            </TouchableOpacity>
+                <View
+                    className="rounded-xl border overflow-hidden"
+                    style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
+                >
+                    {languageOptions.map((option, index) => {
+                        const isSelected = option === selectedLanguage;
+                        return (
+                            <Pressable
+                                key={option}
+                                onPress={() => {
+                                    setSelectedLanguage(option);
+                                    setIsLanguageModalVisible(false);
+                                }}
+                                className={`px-4 py-4 flex-row items-center justify-between ${index !== languageOptions.length - 1 ? 'border-b' : ''}`}
+                                style={{ borderColor: colors.border }}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Use ${option}`}
+                            >
+                                <AppText
+                                    className="text-base font-medium"
+                                    style={{ color: isSelected ? colors.accent : colors.textPrimary }}
+                                >
+                                    {option}
+                                </AppText>
+                                {isSelected && (
+                                    <Ionicons name="checkmark-circle" size={20} color={colors.accent} />
+                                )}
+                            </Pressable>
+                        );
+                    })}
+                </View>
+            </AppModal>
 
-            <Text style={[styles.info, { color: colors.textSecondary }]}>
-                Current theme: {theme}
-            </Text>
-        </View>
+            <AppBottomSheet
+                ref={logoutSheetRef}
+                snapPoints={['42%']}
+                onClose={handleLogoutCancel}
+            >
+                <ConfirmAction
+                    title="Log Out"
+                    desc="Are you sure you want to log out of your account?"
+                    confirmBtnTitle="Log Out"
+                    isDestructive
+                    onConfirm={handleLogoutConfirm}
+                    onCancel={handleLogoutCancel}
+                />
+            </AppBottomSheet>
+        </Screen>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: 32,
-    },
-    themeButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 24,
-        paddingVertical: 14,
-        borderRadius: 12,
-        gap: 12,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 8,
-        elevation: 4,
-    },
-    buttonText: {
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    info: {
-        marginTop: 16,
-        fontSize: 14,
-    },
-});
+
+

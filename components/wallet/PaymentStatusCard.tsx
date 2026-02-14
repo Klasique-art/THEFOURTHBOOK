@@ -1,0 +1,91 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+
+import { useColors } from '@/config';
+
+import AppText from '@/components/ui/AppText';
+interface PaymentStatusCardProps {
+    status: 'paid' | 'unpaid' | 'processing';
+    amount: number;
+    nextDueDate: string;
+    onPayPress: () => void;
+    isProcessing?: boolean;
+}
+
+const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessing }: PaymentStatusCardProps) => {
+    const colors = useColors();
+    const isPaid = status === 'paid';
+
+    return (
+        <LinearGradient
+            colors={isPaid ? [colors.success, '#145A0A'] : [colors.warning, '#C4902C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="p-6 mb-6"
+            style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: 5, borderRadius: 12 }}
+        >
+            <View className="flex-row justify-between items-start mb-4">
+                <View>
+                    <AppText className="text-white/80 text-sm font-bold uppercase tracking-wider mb-1">
+                        Current Status
+                    </AppText>
+                    <View className="flex-row items-center">
+                        <View className={`w-2 h-2 rounded-full mr-2 bg-white`} />
+                        <AppText className="text-white text-xl font-bold">
+                            {isPaid ? "Active & Covered" : "Action Required"}
+                        </AppText>
+                    </View>
+                </View>
+                <View className="bg-white/20 p-2 rounded-full">
+                    <Ionicons
+                        name={isPaid ? "shield-checkmark" : "alert"}
+                        size={24}
+                        color="#FFF"
+                    />
+                </View>
+            </View>
+
+            <View className="flex-row items-end mb-6">
+                <AppText className="text-white text-4xl font-extrabold mr-1">
+                    ${amount.toFixed(2)}
+                </AppText>
+                <AppText className="text-white/80 text-lg mb-1 font-medium">/ month</AppText>
+            </View>
+
+            <View className="flex-row justify-between items-center">
+                <View>
+                    <AppText className="text-white/70 text-xs">
+                        {isPaid ? "Next Payment Due" : "Payment Due By"}
+                    </AppText>
+                    <AppText className="text-white font-bold">
+                        {new Date(nextDueDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </AppText>
+                </View>
+
+                {!isPaid && (
+                    <TouchableOpacity
+                        onPress={onPayPress}
+                        disabled={isProcessing}
+                        className="bg-white px-6 py-3 rounded-full flex-row items-center"
+                        style={{ shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4 }}
+                    >
+                        {isProcessing ? (
+                            <ActivityIndicator size="small" color={colors.primary} />
+                        ) : (
+                            <>
+                                <AppText style={{ color: colors.primary, fontWeight: 'bold' }} className="mr-2">
+                                    Pay Now
+                                </AppText>
+                                <Ionicons name="arrow-forward" size={16} color={colors.primary} />
+                            </>
+                        )}
+                    </TouchableOpacity>
+                )}
+            </View>
+        </LinearGradient>
+    );
+};
+
+export default PaymentStatusCard;

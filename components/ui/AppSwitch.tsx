@@ -28,7 +28,7 @@ const AppSwitch = ({
 
     const handleValueChange = (nextValue: boolean) => {
         if (nextValue && enableHapticsOnEnable) {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
         }
         onValueChange?.(nextValue);
     };

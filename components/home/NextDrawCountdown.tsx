@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useColors } from '@/config';
-
+
+import AppText from '@/components/ui/AppText';
 interface NextDrawCountdownProps {
     drawDate: Date;
     prizeAmount: string;
@@ -47,13 +48,13 @@ const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) =>
                 className="w-16 h-16 rounded-xl items-center justify-center mb-2"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
             >
-                <Text className="text-white text-2xl font-bold">
+                <AppText className="text-white text-2xl font-bold">
                     {value.toString().padStart(2, '0')}
-                </Text>
+                </AppText>
             </View>
-            <Text className="text-white/70 text-xs uppercase">
+            <AppText className="text-white/70 text-xs uppercase">
                 {label}
-            </Text>
+            </AppText>
         </View>
     );
 
@@ -62,7 +63,7 @@ const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) =>
             colors={[colors.accent, colors.accent100]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="p-5 mb-6"
+            className="p-2 mb-6"
             style={{ borderRadius: 16 }}
         >
             <View className="flex-row items-center mb-4">
@@ -72,21 +73,21 @@ const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) =>
                 >
                     <Ionicons name="time-outline" size={20} color="#FFFFFF" />
                 </View>
-                <Text className="text-white text-lg font-bold">
+                <AppText className="text-white text-lg font-bold">
                     Our Next Draw Countdown
-                </Text>
+                </AppText>
             </View>
 
             <View className="items-center mb-4">
-                <Text className="text-white/80 text-sm mb-2">
+                <AppText className="text-white/80 text-sm mb-2">
                     Our Collective Prize Pool
-                </Text>
-                <Text className="text-white text-4xl font-bold">
+                </AppText>
+                <AppText className="text-white text-4xl font-bold">
                     {prizeAmount}
-                </Text>
-                <Text className="text-white/70 text-xs mt-1">
+                </AppText>
+                <AppText className="text-white/70 text-xs mt-1">
                     Changing 5 lives from our community
-                </Text>
+                </AppText>
             </View>
 
             <View className="flex-row justify-around mt-4">

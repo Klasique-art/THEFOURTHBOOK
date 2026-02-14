@@ -1,17 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    TouchableOpacityProps,
-    ViewStyle,
-} from 'react-native';
+    ActivityIndicator, StyleSheet, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native';
 
 import { useColors } from '@/config/colors';
-
+
+import AppText from '@/components/ui/AppText';
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -142,7 +136,7 @@ const AppButton: React.FC<AppButtonProps> = ({
                             style={styles.iconLeft}
                         />
                     )}
-                    <Text style={getTextStyle()}>{title}</Text>
+                    <AppText style={getTextStyle()}>{title}</AppText>
                     {icon && iconPosition === 'right' && (
                         <Ionicons
                             name={icon}

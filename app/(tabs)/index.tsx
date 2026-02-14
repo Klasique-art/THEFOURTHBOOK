@@ -4,7 +4,6 @@ import { RefreshControl, ScrollView } from 'react-native';
 
 import { Screen } from '@/components';
 import {
-    DashboardHeader,
     MembershipProgressCard,
     NextDrawCountdown,
     QuickActionsGrid,
@@ -59,7 +58,6 @@ export default function HomeScreen() {
                     />
                 }
             >
-                <DashboardHeader userName="John" />
 
                 <MembershipProgressCard
                     currentMembers={mockDashboardStats.total_members}

@@ -1,37 +1,70 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
 
-import { useColors } from '@/config/colors';
+import { Screen } from '@/components';
+import {
+    ContributionHistoryTimeline,
+    ContributionStatusCard,
+    DashboardQuickActions,
+    DrawEntryStatus,
+    ParticipationStatsGrid
+} from '@/components/dashboard';
+import { DashboardHeader } from '@/components/home';
+import { useColors } from '@/config';
+import { mockContributions } from '@/data/contributions.dummy';
+import { mockParticipationStats } from '@/data/participationStats.dummy';
+import { mockCurrentUser } from '@/data/userData.dummy';
 
 export default function DashboardScreen() {
     const colors = useColors();
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        // Simulate API fetch delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setRefreshing(false);
+    }, []);
+
+    // Calculate greeting based on time
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>
-                Dashboard
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                Your participation hub
-            </Text>
-        </View>
+        <Screen>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 100 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={colors.primary}
+                        colors={[colors.primary]}
+                    />
+                }
+            >
+                <View className=" pt-2">
+                    <DashboardHeader
+                        userName={mockCurrentUser.first_name}
+                        greeting={greeting}
+                    />
+
+                    <ContributionStatusCard stats={mockParticipationStats} />
+
+                    <DrawEntryStatus
+                        isEntered={!!mockParticipationStats.current_draw_entry_id}
+                        nextDrawDate={mockParticipationStats.next_payment_due_date}
+                    />
+
+                    <DashboardQuickActions />
+
+                    <ParticipationStatsGrid stats={mockParticipationStats} />
+
+                    <ContributionHistoryTimeline contributions={mockContributions} />
+                </View>
+            </ScrollView>
+        </Screen>
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        textAlign: 'center',
-    },
-});

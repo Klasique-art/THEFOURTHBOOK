@@ -13,7 +13,7 @@ interface AppTextProps extends TextProps {
 
 const AppText: React.FC<AppTextProps> = ({
     children,
-    styles = "",
+    className = "",
     style,
     color,
     ...otherProps
@@ -25,7 +25,7 @@ const AppText: React.FC<AppTextProps> = ({
 
     return (
         <Text
-            className={styles}
+            className={className}
             style={[{ color: textColor }, style]}
             {...otherProps}
         >

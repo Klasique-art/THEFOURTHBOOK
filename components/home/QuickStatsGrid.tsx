@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useColors } from '@/config';
 
+
+import AppText from '@/components/ui/AppText';
 interface StatCardProps {
     icon: keyof typeof Ionicons.glyphMap;
     label: string;
@@ -29,19 +31,19 @@ const StatCard = ({ icon, label, value, trend }: StatCardProps) => {
                 <Ionicons name={icon} size={20} color={colors.white} />
             </View>
 
-            <Text
+            <AppText
                 className="text-2xl font-bold mb-1"
                 style={{ color: colors.textPrimary }}
             >
                 {value}
-            </Text>
+            </AppText>
 
-            <Text
+            <AppText
                 className="text-xs mb-2"
                 style={{ color: colors.textSecondary }}
             >
                 {label}
-            </Text>
+            </AppText>
 
             {trend && (
                 <View className="flex-row items-center">
@@ -50,14 +52,14 @@ const StatCard = ({ icon, label, value, trend }: StatCardProps) => {
                         size={12}
                         color={trend.direction === 'up' ? colors.success : colors.error}
                     />
-                    <Text
+                    <AppText
                         className="text-xs ml-1"
                         style={{
                             color: trend.direction === 'up' ? colors.success : colors.error
                         }}
                     >
                         {trend.percentage}
-                    </Text>
+                    </AppText>
                 </View>
             )}
         </View>
@@ -79,9 +81,9 @@ const QuickStatsGrid = ({
 }: QuickStatsGridProps) => {
     return (
         <View className="mb-6">
-            <Text className="text-lg font-bold mb-3" style={{ color: '#571217' }}>
+            <AppText className="text-lg font-bold mb-3">
                 Quick Stats
-            </Text>
+            </AppText>
 
             <View className="flex-row gap-3 mb-3">
                 <StatCard

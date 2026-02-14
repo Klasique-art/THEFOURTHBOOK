@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useColors } from '@/config';
-
+
+import AppText from '@/components/ui/AppText';
 interface DashboardHeaderProps {
     userName: string;
     greeting?: string;
@@ -23,18 +24,18 @@ const DashboardHeader = ({ userName, greeting }: DashboardHeaderProps) => {
         <View className="mb-6">
             <View className="flex-row items-center justify-between mb-2">
                 <View className="flex-1">
-                    <Text
+                    <AppText
                         className="text-base mb-1"
                         style={{ color: colors.textSecondary }}
                     >
                         {autoGreeting}
-                    </Text>
-                    <Text
+                    </AppText>
+                    <AppText
                         className="text-3xl font-bold"
                         style={{ color: colors.textPrimary }}
                     >
                         {userName}
-                    </Text>
+                    </AppText>
                 </View>
                 <View
                     className="w-12 h-12 rounded-full items-center justify-center"
@@ -43,12 +44,12 @@ const DashboardHeader = ({ userName, greeting }: DashboardHeaderProps) => {
                     <Ionicons name="notifications-outline" size={24} color={colors.white} />
                 </View>
             </View>
-            <Text
+            <AppText
                 className="text-sm italic mt-1"
                 style={{ color: colors.textSecondary }}
             >
                 "There Is Power, Real Power In Numbers!"
-            </Text>
+            </AppText>
         </View>
     );
 };

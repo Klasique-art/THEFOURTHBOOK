@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 import { useColors } from '@/config';
 import { QuickAction } from '@/data/static.home';
 
+
+import AppText from '@/components/ui/AppText';
 interface QuickActionsGridProps {
     actions: (QuickAction & { onPress: () => void })[];
 }
@@ -24,24 +26,24 @@ const QuickActionsGrid = ({ actions }: QuickActionsGridProps) => {
             >
                 <Ionicons name={action.icon} size={28} color={action.color} />
             </View>
-            <Text
+            <AppText
                 className="text-xs text-center"
                 style={{ color: colors.textPrimary }}
                 numberOfLines={2}
             >
                 {action.label}
-            </Text>
+            </AppText>
         </TouchableOpacity>
     );
 
     return (
         <View className="mb-6">
-            <Text
+            <AppText
                 className="text-lg font-bold mb-3"
                 style={{ color: colors.textPrimary }}
             >
                 Quick Actions
-            </Text>
+            </AppText>
 
             <View
                 className="rounded-2xl p-5"

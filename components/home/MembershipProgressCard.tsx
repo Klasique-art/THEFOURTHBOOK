@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useColors } from '@/config';
-
+
+import AppText from '@/components/ui/AppText';
 interface MembershipProgressCardProps {
     currentMembers: number;
     targetMembers: number;
@@ -36,29 +37,29 @@ const MembershipProgressCard = ({
                     >
                         <Ionicons name="people" size={20} color="#FFFFFF" />
                     </View>
-                    <Text className="text-white text-lg font-bold">
+                    <AppText className="text-white text-lg font-bold">
                         Our Community Growth
-                    </Text>
+                    </AppText>
                 </View>
                 {isActive && (
                     <View className="bg-green-500 px-3 py-1 rounded-full">
-                        <Text className="text-white text-xs font-bold">ACTIVE</Text>
+                        <AppText className="text-white text-xs font-bold">ACTIVE</AppText>
                     </View>
                 )}
             </View>
 
             <View className="mb-4">
                 <View className="flex-row items-end justify-between mb-2">
-                    <Text className="text-white text-4xl font-bold">
+                    <AppText className="text-white text-4xl font-bold">
                         {currentMembers.toLocaleString()}
-                    </Text>
-                    <Text className="text-white/70 text-base mb-1">
+                    </AppText>
+                    <AppText className="text-white/70 text-base mb-1">
                         / {targetMembers.toLocaleString()}
-                    </Text>
+                    </AppText>
                 </View>
-                <Text className="text-white/80 text-sm">
+                <AppText className="text-white/80 text-sm">
                     Members Strong & Growing
-                </Text>
+                </AppText>
             </View>
 
             {/* Progress Bar */}
@@ -75,9 +76,9 @@ const MembershipProgressCard = ({
                         }}
                     />
                 </View>
-                <Text className="text-white/70 text-xs mt-2">
+                <AppText className="text-white/70 text-xs mt-2">
                     {progress.toFixed(1)}% Complete
-                </Text>
+                </AppText>
             </View>
 
             {!isActive && (
@@ -87,9 +88,9 @@ const MembershipProgressCard = ({
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="information-circle" size={16} color={colors.warning} />
-                        <Text className="text-white text-xs ml-2 flex-1">
+                        <AppText className="text-white text-xs ml-2 flex-1">
                             We're almost there! Just {membersNeeded.toLocaleString()} more members until we activate monthly payouts together!
-                        </Text>
+                        </AppText>
                     </View>
                 </View>
             )}
@@ -101,9 +102,9 @@ const MembershipProgressCard = ({
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                        <Text className="text-white text-xs ml-2 flex-1">
+                        <AppText className="text-white text-xs ml-2 flex-1">
                             We did it! Our community unlocked monthly payouts! 🎉
-                        </Text>
+                        </AppText>
                     </View>
                 </View>
             )}

@@ -101,7 +101,7 @@ const darkColors: ColorScheme = {
     success: '#1A760D',      // Green - success states (brand green)
     error: '#DC2626',        // Red - error states
     warning: '#F8B735',      // Yellow - warning states (brand yellow)
-    info: '#040F40',         // Deep Blue - info states (brand blue)
+    info: '#0000ff',         // Deep Blue - info states (brand blue)
 };
 
 export const getColors = (theme: Theme): ColorScheme => {
