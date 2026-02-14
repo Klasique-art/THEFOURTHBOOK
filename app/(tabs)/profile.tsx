@@ -1,4 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -8,6 +10,7 @@ import { ProfileHeader, SettingsList } from '@/components/profile';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
 import { SupportedLanguage } from '@/config/i18n';
+import { ONBOARDING_SEEN_KEY } from '@/data/onboarding';
 import { useLanguage } from '@/context/LanguageContext';
 import { mockCurrentUser } from '@/data/userData.dummy';
 
@@ -51,6 +54,15 @@ export default function ProfileScreen() {
     const supportSettings = [
         { id: 'help', label: 'Help & Support', icon: 'help-circle-outline', route: '/settings/support' },
         { id: 'about', label: 'About App', icon: 'information-circle-outline', route: '/settings/about' },
+        {
+            id: 'replay-onboarding',
+            label: 'Replay Onboarding',
+            icon: 'sparkles-outline',
+            action: async () => {
+                await AsyncStorage.removeItem(ONBOARDING_SEEN_KEY);
+                router.push('/onboarding');
+            }
+        },
     ];
 
     const handleLogout = () => {

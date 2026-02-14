@@ -14,6 +14,7 @@ export default function RootLayout() {
         <ThemeProvider>
           <ToastProvider>
             <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="onboarding" />
               <Stack.Screen name="(tabs)" />
             </Stack>
           </ToastProvider>
