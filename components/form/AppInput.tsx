@@ -1,6 +1,7 @@
 import { useColors } from '@/config/colors';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TextInput as RNTextInput, TextInputProps as RNTextInputProps, TouchableOpacity, View } from 'react-native';
 
 import AppText from '@/components/ui/AppText';
@@ -42,6 +43,7 @@ const AppInput = ({
     ...otherProps
 }: AppInputProps) => {
     const colors = useColors();
+    const { t } = useTranslation();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
     const inputId = `input-${name}`;
@@ -98,7 +100,7 @@ const AppInput = ({
                         borderColor: isFocused ? colors.accent : colors.border,
                         color: colors.textPrimary,
                     }}
-                    placeholder={placeholder}
+                    placeholder={placeholder ? t(placeholder) : placeholder}
                     placeholderTextColor={colors.textSecondary}
                     value={value}
                     onChangeText={onChange}
@@ -112,14 +114,14 @@ const AppInput = ({
                     secureTextEntry={secureTextEntry && !isPasswordVisible}
                     keyboardType={keyboardType}
                     autoCapitalize={autoCapitalize}
-                    accessibilityLabel={label}
+                    accessibilityLabel={t(label)}
                     {...otherProps}
                 />
                 {icon && (
                     <TouchableOpacity
                         className="absolute right-0 top-0 h-12 w-12 flex items-center justify-center"
                         onPress={secureTextEntry ? togglePasswordVisibility : iconClick}
-                        accessibilityLabel={iconAria || 'Icon button'}
+                        accessibilityLabel={iconAria ? t(iconAria) : t('Icon button')}
                         accessibilityRole="button"
                     >
                         {getIconComponent()}

@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { useColors } from '@/config';
-
+
+
 import AppText from '@/components/ui/AppText';
 interface NextDrawCountdownProps {
     drawDate: Date;
@@ -68,10 +69,10 @@ const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) =>
         >
             <View className="flex-row items-center mb-4">
                 <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    className="w-8 h-8 rounded-full items-center justify-center mr-1"
                     style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                 >
-                    <Ionicons name="time-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="time-outline" size={16} color="#FFFFFF" />
                 </View>
                 <AppText className="text-white text-lg font-bold">
                     Our Next Draw Countdown

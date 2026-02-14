@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AppToast, { ToastVariant } from '@/components/ui/AppToast';
 
@@ -25,11 +26,12 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 const defaultToastState: ToastState = {
     message: '',
     variant: 'info',
-    duration: 2800,
+    duration: 5200,
     visible: false,
 };
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
+    const insets = useSafeAreaInsets();
     const [toast, setToast] = useState<ToastState>(defaultToastState);
 
     const hideToast = () => {
@@ -40,7 +42,7 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
         setToast({
             message,
             variant: options?.variant || 'info',
-            duration: options?.duration || 2800,
+            duration: options?.duration || 5200,
             visible: true,
         });
     };
@@ -58,7 +60,13 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
             {children}
             <View
                 pointerEvents="box-none"
-                className="absolute left-0 right-0 top-12 z-50"
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: insets.top + 16,
+                    zIndex: 50,
+                }}
             >
                 <AppToast
                     visible={toast.visible}

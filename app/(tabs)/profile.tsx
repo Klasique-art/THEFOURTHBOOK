@@ -1,20 +1,35 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { AppBottomSheet, type AppBottomSheetRef, AppModal, ConfirmAction, Screen } from '@/components';
 import { ProfileHeader, SettingsList } from '@/components/profile';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
+import { SupportedLanguage } from '@/config/i18n';
+import { useLanguage } from '@/context/LanguageContext';
 import { mockCurrentUser } from '@/data/userData.dummy';
 
 export default function ProfileScreen() {
     const colors = useColors();
-    const [selectedLanguage, setSelectedLanguage] = useState('English');
+    const { t } = useTranslation();
+    const { language, setLanguage } = useLanguage();
     const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
     const logoutSheetRef = useRef<AppBottomSheetRef>(null);
 
-    const languageOptions = useMemo(() => ['English', 'French', 'Spanish'], []);
+    const languageOptions = useMemo<{ label: string; code: SupportedLanguage }[]>(
+        () => [
+            { label: 'English', code: 'en' },
+            { label: 'French', code: 'fr' },
+        ],
+        []
+    );
+
+    const selectedLanguageLabel = useMemo(
+        () => languageOptions.find((item) => item.code === language)?.label || 'English',
+        [languageOptions, language]
+    );
 
     const accountSettings = [
         { id: 'account', label: 'Account Details', icon: 'person-outline', route: '/settings/account' },
@@ -28,7 +43,7 @@ export default function ProfileScreen() {
             id: 'language',
             label: 'Language',
             icon: 'globe-outline',
-            value: selectedLanguage,
+            value: selectedLanguageLabel,
             action: () => setIsLanguageModalVisible(true)
         },
     ];
@@ -90,24 +105,24 @@ export default function ProfileScreen() {
                     style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
                 >
                     {languageOptions.map((option, index) => {
-                        const isSelected = option === selectedLanguage;
+                        const isSelected = option.code === language;
                         return (
                             <Pressable
-                                key={option}
-                                onPress={() => {
-                                    setSelectedLanguage(option);
+                                key={option.code}
+                                onPress={async () => {
+                                    await setLanguage(option.code);
                                     setIsLanguageModalVisible(false);
                                 }}
                                 className={`px-4 py-4 flex-row items-center justify-between ${index !== languageOptions.length - 1 ? 'border-b' : ''}`}
                                 style={{ borderColor: colors.border }}
                                 accessibilityRole="button"
-                                accessibilityLabel={`Use ${option}`}
+                                accessibilityLabel={t('Use {{language}}', { language: t(option.label) })}
                             >
                                 <AppText
                                     className="text-base font-medium"
                                     style={{ color: isSelected ? colors.accent : colors.textPrimary }}
                                 >
-                                    {option}
+                                    {option.label}
                                 </AppText>
                                 {isSelected && (
                                     <Ionicons name="checkmark-circle" size={20} color={colors.accent} />

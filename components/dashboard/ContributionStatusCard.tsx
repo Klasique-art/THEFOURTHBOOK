@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useColors } from '@/config';
@@ -13,8 +14,9 @@ interface ContributionStatusCardProps {
 
 const ContributionStatusCard = ({ stats }: ContributionStatusCardProps) => {
     const colors = useColors();
+    const { t, i18n } = useTranslation();
     const isPaid = stats.current_month_status === 'paid';
-    const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+    const currentMonth = new Date().toLocaleString(i18n.language || 'en', { month: 'long' });
 
     return (
         <LinearGradient
@@ -26,11 +28,11 @@ const ContributionStatusCard = ({ stats }: ContributionStatusCardProps) => {
         >
             <View className="flex-row items-center justify-between mb-4">
                 <AppText className="text-white text-lg font-bold">
-                    {currentMonth} Contribution
+                    {t('{{month}} Contribution', { month: currentMonth })}
                 </AppText>
                 <View className="bg-white/20 px-3 py-1 rounded-full">
                     <AppText className="text-white text-xs font-bold uppercase">
-                        {isPaid ? 'Active' : 'Pending'}
+                        {isPaid ? t('Active') : t('Pending')}
                     </AppText>
                 </View>
             </View>
@@ -45,12 +47,14 @@ const ContributionStatusCard = ({ stats }: ContributionStatusCardProps) => {
                 </View>
                 <View>
                     <AppText className="text-white text-3xl font-bold">
-                        {isPaid ? "You're In!" : "Due Soon"}
+                        {isPaid ? t("You're In!") : t('Due Soon')}
                     </AppText>
                     <AppText className="text-white/80 text-sm">
                         {isPaid
-                            ? "Contribution received. Good luck!"
-                            : `Payment due by ${new Date(stats.next_payment_due_date).toLocaleDateString()}`}
+                            ? t('Contribution received. Good luck!')
+                            : t('Payment due by {{date}}', {
+                                date: new Date(stats.next_payment_due_date).toLocaleDateString()
+                            })}
                     </AppText>
                 </View>
             </View>
@@ -59,7 +63,7 @@ const ContributionStatusCard = ({ stats }: ContributionStatusCardProps) => {
                 <View className="bg-black/10 rounded-xl p-3 flex-row items-center">
                     <Ionicons name="ticket-outline" size={20} color="#FFFFFF" />
                     <AppText className="text-white ml-2 flex-1">
-                        Entry ID: <AppText className="font-bold">{stats.current_draw_entry_id}</AppText>
+                        {t('Entry ID:')} <AppText className="font-bold" disableTranslation>{stats.current_draw_entry_id}</AppText>
                     </AppText>
                 </View>
             )}

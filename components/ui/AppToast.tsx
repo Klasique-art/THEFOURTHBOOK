@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Pressable, View } from 'react-native';
 
 import { useColors } from '@/config/colors';
@@ -20,10 +21,11 @@ const AppToast = ({
     visible,
     message,
     variant = 'info',
-    duration = 2800,
+    duration = 5200,
     onHide,
 }: AppToastProps) => {
     const colors = useColors();
+    const { t } = useTranslation();
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(-20)).current;
 
@@ -53,6 +55,8 @@ const AppToast = ({
 
     useEffect(() => {
         if (!visible) return;
+        opacity.setValue(0);
+        translateY.setValue(-20);
 
         Animated.parallel([
             Animated.timing(opacity, {
@@ -73,7 +77,7 @@ const AppToast = ({
         }, duration);
 
         return () => clearTimeout(timer);
-    }, [visible, duration, hideToast, opacity, translateY]);
+    }, [visible, message, variant, duration, hideToast, opacity, translateY]);
 
     if (!visible) return null;
 
@@ -85,13 +89,19 @@ const AppToast = ({
                 opacity,
                 transform: [{ translateY }],
             }}
-            className="mx-4 rounded-xl border px-4 py-3"
+            className="mx-4 rounded-xl"
         >
             <View
-                className="flex-row items-center rounded-xl border px-3 py-3"
+                className="flex-row items-center rounded-xl px-3 py-3"
                 style={{
                     backgroundColor: colors.background,
-                    borderColor: active.color,
+                    borderLeftWidth: 4,
+                    borderLeftColor: active.color,
+                    shadowColor: '#000000',
+                    shadowOpacity: 0.18,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 5 },
+                    elevation: 6,
                 }}
             >
                 <Ionicons name={active.icon} size={20} color={active.color} />
@@ -103,7 +113,7 @@ const AppToast = ({
                 </AppText>
                 <Pressable
                     onPress={hideToast}
-                    accessibilityLabel="Dismiss toast"
+                    accessibilityLabel={t('Dismiss toast')}
                     accessibilityRole="button"
                     className="ml-2 p-1"
                 >

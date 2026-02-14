@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useColors } from '@/config';
@@ -14,6 +15,7 @@ interface ProfileHeaderProps {
 
 const ProfileHeader = ({ name, email, joinDate, isVerified }: ProfileHeaderProps) => {
     const colors = useColors();
+    const { t } = useTranslation();
 
     return (
         <View className="items-center my-8">
@@ -23,7 +25,7 @@ const ProfileHeader = ({ name, email, joinDate, isVerified }: ProfileHeaderProps
                         className="absolute bottom-0 right-0 bg-white rounded-full p-1 border-2"
                         style={{ borderColor: colors.background }}
                         accessible={true}
-                        accessibilityLabel="Verified account"
+                        accessibilityLabel={t('Verified account')}
                     >
                         <Ionicons name="checkmark-circle" size={20} color={colors.success} />
                     </View>

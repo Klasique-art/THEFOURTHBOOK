@@ -1,12 +1,15 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from 'react';
+
+import { Nav, Screen } from '@/components';
+import AppText from '@/components/ui/AppText';
 
 const FairnessScreen = () => {
-  return (
-    <View>
-      <Text>FairnessScreen</Text>
-    </View>
-  )
-}
+    return (
+        <Screen>
+            <Nav title="Fairness" />
+            <AppText>FairnessScreen</AppText>
+        </Screen>
+    );
+};
 
-export default FairnessScreen
+export default FairnessScreen;

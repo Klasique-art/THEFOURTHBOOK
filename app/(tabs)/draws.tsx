@@ -15,7 +15,7 @@ export default function DrawsScreen() {
 
     // Get current/latest data
     const latestCycle = mockDistributionCycles[0];
-    const nextDrawDate = '2026-02-28T18:00:00Z'; // Mock next date
+    const nextDrawDate = '2026-02-28T18:00:00Z'; 
 
     const handleViewHistory = () => {
         router.push('/draws/history' as any);

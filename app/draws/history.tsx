@@ -1,12 +1,15 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from 'react';
+
+import { Nav, Screen } from '@/components';
+import AppText from '@/components/ui/AppText';
 
 const DrawsHistoryScreen = () => {
-  return (
-    <View>
-      <Text>DrawsHistoryScreen</Text>
-    </View>
-  )
-}
+    return (
+        <Screen>
+            <Nav title="Draw History" />
+            <AppText>DrawsHistoryScreen</AppText>
+        </Screen>
+    );
+};
 
-export default DrawsHistoryScreen
+export default DrawsHistoryScreen;

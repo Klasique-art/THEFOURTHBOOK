@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 
 import { Nav, Screen } from '@/components';
@@ -35,6 +36,7 @@ const FAQS = [
 const SupportScreen = () => {
     const colors = useColors();
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [openFaqIds, setOpenFaqIds] = useState<string[]>([FAQS[0].id]);
 
     const toggleFaq = (id: string) => {
@@ -90,7 +92,7 @@ const SupportScreen = () => {
                                     className="flex-row items-center justify-between p-4"
                                     accessibilityRole="button"
                                     accessibilityState={{ expanded: isOpen }}
-                                    accessibilityLabel={item.question}
+                                    accessibilityLabel={t(item.question)}
                                 >
                                     <AppText className="flex-1 pr-3 text-base font-medium" style={{ color: colors.textPrimary }}>
                                         {item.question}
@@ -130,7 +132,7 @@ const SupportScreen = () => {
                         className="flex-row items-center justify-center rounded-xl py-3 px-4"
                         style={{ backgroundColor: colors.accent }}
                         accessibilityRole="button"
-                        accessibilityLabel={`Contact support via email at ${SUPPORT_EMAIL}`}
+                        accessibilityLabel={t('Contact support via email at {{email}}', { email: SUPPORT_EMAIL })}
                     >
                         <Ionicons name="mail-outline" size={18} color={colors.white} />
                         <AppText className="ml-2 text-sm font-bold" style={{ color: colors.white }}>

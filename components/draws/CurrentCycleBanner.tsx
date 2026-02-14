@@ -5,7 +5,8 @@ import { View } from 'react-native';
 
 import { NextDrawCountdown } from '@/components/home';
 import { useColors } from '@/config';
-
+
+
 import AppText from '@/components/ui/AppText';
 interface CurrentCycleBannerProps {
     nextDrawDate: string;
@@ -21,7 +22,7 @@ const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: Cur
             colors={[colors.primary, '#2C3E50']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="p-6 mb-6 mt-4"
+            className="p-4 mb-6 mt-4"
             style={{ shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5, borderRadius: 20 }}
         >
             <View className="flex-row justify-between items-start mb-6">
@@ -38,7 +39,7 @@ const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: Cur
                 </View>
             </View>
 
-            <View className="bg-black/20 rounded-2xl p-4 mb-4">
+            <View className="bg-black/20 rounded-2xl p-2 mb-4">
                 <View className="flex-row items-center justify-between mb-2">
                     <AppText className="text-white/90 font-bold">Next Selection In</AppText>
                     <Ionicons name="time-outline" size={16} color="#FFF" />

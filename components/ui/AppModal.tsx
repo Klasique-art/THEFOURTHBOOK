@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Modal, Pressable, View } from 'react-native';
 
 import { useColors } from '@/config/colors';
@@ -24,6 +25,7 @@ const AppModal = ({
     showCloseButton = true,
 }: AppModalProps) => {
     const colors = useColors();
+    const { t } = useTranslation();
     const [isMounted, setIsMounted] = useState(visible);
     const overlayOpacity = useRef(new Animated.Value(0)).current;
     const contentOpacity = useRef(new Animated.Value(0)).current;
@@ -111,7 +113,7 @@ const AppModal = ({
                     style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
                     onPress={closeOnBackdropPress ? handleClose : undefined}
                     accessibilityRole={closeOnBackdropPress ? 'button' : undefined}
-                    accessibilityLabel={closeOnBackdropPress ? 'Close modal' : undefined}
+                    accessibilityLabel={closeOnBackdropPress ? t('Close modal') : undefined}
                 />
 
                 <Animated.View
@@ -138,7 +140,7 @@ const AppModal = ({
                                     onPress={handleClose}
                                     className="rounded-full p-1"
                                     accessibilityRole="button"
-                                    accessibilityLabel="Close modal"
+                                    accessibilityLabel={t('Close modal')}
                                 >
                                     <Ionicons name="close" size={20} color={colors.textSecondary} />
                                 </Pressable>

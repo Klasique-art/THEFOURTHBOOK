@@ -1,12 +1,15 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from 'react';
+
+import { Nav, Screen } from '@/components';
+import AppText from '@/components/ui/AppText';
 
 const MySelectionStatusScreen = () => {
-  return (
-    <View>
-      <Text>MySelectionStatusScreen</Text>
-    </View>
-  )
-}
+    return (
+        <Screen>
+            <Nav title="My Status" />
+            <AppText>MySelectionStatusScreen</AppText>
+        </Screen>
+    );
+};
 
-export default MySelectionStatusScreen
+export default MySelectionStatusScreen;

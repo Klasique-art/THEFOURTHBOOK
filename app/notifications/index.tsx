@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Nav, Screen } from '@/components';
@@ -15,6 +16,7 @@ import {
 const NotificationsScreen = () => {
     const colors = useColors();
     const { showToast } = useToast();
+    const { t } = useTranslation();
 
     const [filter, setFilter] = useState<NotificationStatusFilter>('all');
     const [notifications, setNotifications] = useState<AppNotification[]>(
@@ -104,7 +106,7 @@ const NotificationsScreen = () => {
                         className="rounded-lg px-3 py-2"
                         style={{ backgroundColor: `${colors.accent}20` }}
                         accessibilityRole="button"
-                        accessibilityLabel="Mark all notifications as read"
+                        accessibilityLabel={t('Mark all notifications as read')}
                     >
                         <AppText className="text-xs font-bold" style={{ color: colors.accent }}>
                             Mark All Read
@@ -126,7 +128,7 @@ const NotificationsScreen = () => {
                                     borderColor: isActive ? colors.accent : colors.border,
                                 }}
                                 accessibilityRole="button"
-                                accessibilityLabel={`Show ${item} notifications`}
+                                accessibilityLabel={t('Show {{status}} notifications', { status: t(item) })}
                             >
                                 <AppText
                                     className="text-xs font-bold uppercase"
@@ -196,7 +198,7 @@ const NotificationsScreen = () => {
                                                     <Pressable
                                                         onPress={() => markAsRead(item.notification_id)}
                                                         accessibilityRole="button"
-                                                        accessibilityLabel="Mark notification as read"
+                                                        accessibilityLabel={t('Mark notification as read')}
                                                     >
                                                         <AppText className="text-xs font-bold" style={{ color: colors.accent }}>
                                                             Mark as Read
@@ -206,7 +208,7 @@ const NotificationsScreen = () => {
                                                 <Pressable
                                                     onPress={() => deleteNotification(item.notification_id)}
                                                     accessibilityRole="button"
-                                                    accessibilityLabel="Delete notification"
+                                                    accessibilityLabel={t('Delete notification')}
                                                 >
                                                     <AppText className="text-xs font-bold" style={{ color: colors.error }}>
                                                         Delete

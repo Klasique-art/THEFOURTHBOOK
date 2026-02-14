@@ -1,5 +1,6 @@
 import { useFormikContext } from 'formik';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import AppSwitch from '@/components/ui/AppSwitch';
@@ -14,6 +15,7 @@ interface ToggleFieldProps {
 
 const ToggleField = ({ name, label, description }: ToggleFieldProps) => {
     const colors = useColors();
+    const { t } = useTranslation();
     const { values, setFieldValue } = useFormikContext<any>();
 
     const value = values[name] as boolean;
@@ -41,7 +43,7 @@ const ToggleField = ({ name, label, description }: ToggleFieldProps) => {
                 activeTrackColor={colors.accent50}
                 activeThumbColor={colors.accent}
                 inactiveThumbColor={colors.textSecondary}
-                accessibilityLabel={`${label} toggle`}
+                accessibilityLabel={t('{{label}} toggle', { label: t(label) })}
                 accessibilityRole="switch"
                 accessibilityState={{ checked: value }}
             />
