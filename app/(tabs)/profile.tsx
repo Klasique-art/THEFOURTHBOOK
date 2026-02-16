@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useRef, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
@@ -11,6 +12,7 @@ import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
 import { SupportedLanguage } from '@/config/i18n';
 import { ONBOARDING_SEEN_KEY } from '@/data/onboarding';
+import { KYC_VERIFIED_KEY } from '@/data/verification';
 import { useLanguage } from '@/context/LanguageContext';
 import { mockCurrentUser } from '@/data/userData.dummy';
 
@@ -19,7 +21,38 @@ export default function ProfileScreen() {
     const { t } = useTranslation();
     const { language, setLanguage } = useLanguage();
     const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
     const logoutSheetRef = useRef<AppBottomSheetRef>(null);
+
+    useFocusEffect(
+        React.useCallback(() => {
+            let isMounted = true;
+
+            const loadVerificationState = async () => {
+                try {
+                    const storedValue = await AsyncStorage.getItem(KYC_VERIFIED_KEY);
+                    if (!isMounted) return;
+
+                    if (storedValue === 'true') {
+                        setIsVerified(true);
+                        return;
+                    }
+
+                    setIsVerified(false);
+                } catch {
+                    if (isMounted) {
+                        setIsVerified(false);
+                    }
+                }
+            };
+
+            void loadVerificationState();
+
+            return () => {
+                isMounted = false;
+            };
+        }, [])
+    );
 
     const languageOptions = useMemo<{ label: string; code: SupportedLanguage }[]>(
         () => [
@@ -86,7 +119,8 @@ export default function ProfileScreen() {
                         name={`${mockCurrentUser.first_name} ${mockCurrentUser.last_name}`}
                         email={mockCurrentUser.email}
                         joinDate={mockCurrentUser.created_at}
-                        isVerified={mockCurrentUser.kyc_status === 'verified'}
+                        isVerified={isVerified}
+                        onVerifyPress={() => router.push('/verification')}
                     />
 
                     <SettingsList title="Account" items={accountSettings as any} />

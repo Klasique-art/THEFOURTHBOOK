@@ -11,8 +11,10 @@ import {
 } from '@/components/dashboard';
 import { DashboardHeader } from '@/components/home';
 import { useColors } from '@/config';
+import { mockDashboardStats } from '@/data/dummy.draws';
 import { mockContributions } from '@/data/contributions.dummy';
 import { mockParticipationStats } from '@/data/participationStats.dummy';
+import { APP_CONFIG } from '@/data/static.home';
 import { mockCurrentUser } from '@/data/userData.dummy';
 
 export default function DashboardScreen() {
@@ -54,7 +56,9 @@ export default function DashboardScreen() {
 
                     <DrawEntryStatus
                         isEntered={!!mockParticipationStats.current_draw_entry_id}
-                        nextDrawDate={mockParticipationStats.next_payment_due_date}
+                        currentPool={mockDashboardStats.total_pool}
+                        threshold={APP_CONFIG.DISTRIBUTION_THRESHOLD}
+                        winnersCount={APP_CONFIG.WINNERS_PER_DRAW}
                     />
 
                     <DashboardQuickActions />

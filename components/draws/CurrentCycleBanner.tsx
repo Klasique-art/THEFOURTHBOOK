@@ -9,12 +9,13 @@ import { useColors } from '@/config';
 
 import AppText from '@/components/ui/AppText';
 interface CurrentCycleBannerProps {
-    nextDrawDate: string;
-    totalPool: number;
+    currentPool: number;
+    threshold: number;
     beneficiariesCount: number;
+    onPlayGame?: () => void;
 }
 
-const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: CurrentCycleBannerProps) => {
+const CurrentCycleBanner = ({ currentPool, threshold, beneficiariesCount, onPlayGame }: CurrentCycleBannerProps) => {
     const colors = useColors();
 
     return (
@@ -27,11 +28,11 @@ const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: Cur
         >
             <View className="flex-row justify-between items-start mb-6">
                 <View>
-                    <AppText className="text-white/80 text-sm mb-1 uppercase tracking-wider font-bold">
-                        Current Cycle Pool
+                    <AppText className="text-sm mb-1 uppercase tracking-wider font-bold">
+                        Current Distribution Pool
                     </AppText>
-                    <AppText className="text-white text-4xl font-extrabold">
-                        ${totalPool.toLocaleString()}
+                    <AppText className="text-4xl font-extrabold">
+                        ${currentPool.toLocaleString()}
                     </AppText>
                 </View>
                 <View className="bg-white/20 p-2 rounded-full">
@@ -41,20 +42,21 @@ const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: Cur
 
             <View className="bg-black/20 rounded-2xl p-2 mb-4">
                 <View className="flex-row items-center justify-between mb-2">
-                    <AppText className="text-white/90 font-bold">Next Selection In</AppText>
-                    <Ionicons name="time-outline" size={16} color="#FFF" />
+                    <AppText className="font-bold">Threshold Trigger Model</AppText>
+                    <Ionicons name="flash-outline" size={16} color="#FFF" />
                 </View>
-                {/* Reusing existing countdown logic */}
                 <NextDrawCountdown
-                    drawDate={new Date(nextDrawDate)}
-                    prizeAmount={`$${totalPool.toLocaleString()}`}
+                    currentPool={currentPool}
+                    threshold={threshold}
+                    beneficiariesCount={beneficiariesCount}
+                    onPlayGame={onPlayGame}
                 />
             </View>
 
             <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
                     <Ionicons name="people" size={18} color="#FFF" />
-                    <AppText className="text-white ml-2 font-medium">
+                    <AppText className="ml-2 font-medium">
                         {beneficiariesCount} Beneficiaries to be selected
                     </AppText>
                 </View>
@@ -64,3 +66,4 @@ const CurrentCycleBanner = ({ nextDrawDate, totalPool, beneficiariesCount }: Cur
 };
 
 export default CurrentCycleBanner;
+

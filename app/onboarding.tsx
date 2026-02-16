@@ -8,6 +8,7 @@ import Animated, {
     Extrapolation,
     interpolate,
     interpolateColor,
+    SharedValue,
     useAnimatedScrollHandler,
     useAnimatedStyle,
     useSharedValue,
@@ -28,7 +29,7 @@ const BackgroundLayer = ({
 }: {
     index: number;
     colors: [string, string];
-    scrollX: Animated.SharedValue<number>;
+    scrollX: SharedValue<number>;
 }) => {
     const style = useAnimatedStyle(() => {
         const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
@@ -49,7 +50,7 @@ const BackgroundLayer = ({
     );
 };
 
-const ProgressDot = ({ index, scrollX }: { index: number; scrollX: Animated.SharedValue<number> }) => {
+const ProgressDot = ({ index, scrollX }: { index: number; scrollX: SharedValue<number> }) => {
     const dotStyle = useAnimatedStyle(() => {
         const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
         return {
@@ -84,7 +85,7 @@ const OnboardingScreen = () => {
         const isLast = currentIndex === onboardingSlides.length - 1;
         if (isLast) {
             await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
-            router.replace('/(tabs)');
+            router.replace('/(auth)/login');
             return;
         }
 
@@ -93,7 +94,7 @@ const OnboardingScreen = () => {
 
     const handleSkip = async () => {
         await AsyncStorage.setItem(ONBOARDING_SEEN_KEY, 'true');
-        router.replace('/(tabs)');
+        router.replace('/(auth)/login');
     };
 
     const nextButtonStyle = useAnimatedStyle(() => {
@@ -151,13 +152,15 @@ const OnboardingScreen = () => {
         return (
             <View style={{ width }} className="flex-1 justify-center px-7 pb-2">
                 <View
-                    className="mt-8 rounded-[28px] bg-black/16 px-6 py-8"
+                    className="mt-8 rounded-[28px] bg-black/20 px-8 py-8"
                     style={{
+                        borderWidth: 1,
+                        borderColor: 'rgba(255,255,255,0.12)',
                         shadowColor: '#000000',
-                        shadowOpacity: 0.2,
-                        shadowRadius: 14,
-                        shadowOffset: { width: 0, height: 8 },
-                        elevation: 8,
+                        shadowOpacity: 0.16,
+                        shadowRadius: 16,
+                        shadowOffset: { width: 0, height: 10 },
+                        elevation: 6,
                     }}
                 >
                     <Animated.View style={iconStyle} className="mb-6 self-center">
@@ -167,14 +170,14 @@ const OnboardingScreen = () => {
                     </Animated.View>
 
                     <Animated.View style={textStyle}>
-                        <AppText className="mb-2 text-center text-[30px] font-bold leading-10 text-white">
+                        <AppText color="#FFFFFF" className="mb-2 text-center text-[30px] font-bold leading-10">
                             {item.title}
                         </AppText>
-                        <AppText className="mb-5 text-center text-[16px] leading-7 text-white/88">
+                        <AppText color="rgba(255,255,255,0.92)" className="mb-5 text-center text-[16px] leading-7">
                             {item.description}
                         </AppText>
 
-                        <View className="gap-2">
+                        <View className="gap-2 p-2">
                             {item.details?.map((detail: string, idx: number) => (
                                 <View key={`${item.id}-detail-${idx}`} className="flex-row items-start">
                                     <Ionicons
@@ -183,7 +186,7 @@ const OnboardingScreen = () => {
                                         color="rgba(255,255,255,0.9)"
                                         style={{ marginTop: 3, marginRight: 8 }}
                                     />
-                                    <AppText className="flex-1 text-[14px] leading-6 text-white/85">
+                                    <AppText color="rgba(255,255,255,0.9)" className="flex-1 text-[14px] leading-6">
                                         {detail}
                                     </AppText>
                                 </View>
@@ -203,12 +206,13 @@ const OnboardingScreen = () => {
                 {backgroundLayers.map((layer, index) => (
                     <BackgroundLayer key={layer.id} index={index} colors={layer.colors} scrollX={scrollX} />
                 ))}
+                <View className="absolute inset-0 bg-black/22" pointerEvents="none" />
 
                 <FloatingGlow />
 
                 <View className="px-6" style={{ paddingTop: insets.top + 8 }}>
                     <View className="flex-row items-center justify-between">
-                        <AppText className="text-xs font-bold tracking-[0.2em] text-white/80">THE FOURTH BOOK</AppText>
+                        <AppText color="rgba(255,255,255,0.85)" className="text-xs font-bold tracking-[0.2em]">THE FOURTH BOOK</AppText>
                         <Pressable
                             onPress={handleSkip}
                             className="rounded-full bg-white/22 px-4 py-2"
@@ -220,7 +224,7 @@ const OnboardingScreen = () => {
                                 elevation: 5,
                             }}
                         >
-                            <AppText className="text-xs font-semibold text-white">Skip</AppText>
+                            <AppText color="#FFFFFF" className="text-xs font-semibold">Skip</AppText>
                         </Pressable>
                     </View>
                 </View>
@@ -271,7 +275,7 @@ const OnboardingScreen = () => {
                                 className="absolute inset-0 rounded-full"
                             />
                             <View className="flex-row items-center justify-center">
-                                <AppText className="mr-2 text-base font-bold text-white">
+                                <AppText color="#FFFFFF" className="mr-2 text-base font-bold">
                                     {currentIndex === onboardingSlides.length - 1 ? 'Get Started' : 'Next'}
                                 </AppText>
                                 <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />

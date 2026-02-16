@@ -8,14 +8,14 @@ import {
     DrawsNavigationGrid,
     LatestDistributionCard
 } from '@/components/draws';
-import { mockDistributionCycles } from '@/data/dummy.draws';
+import { mockDashboardStats, mockDistributionCycles } from '@/data/dummy.draws';
+import { APP_CONFIG } from '@/data/static.home';
 
 export default function DrawsScreen() {
     const router = useRouter();
 
     // Get current/latest data
     const latestCycle = mockDistributionCycles[0];
-    const nextDrawDate = '2026-02-28T18:00:00Z'; 
 
     const handleViewHistory = () => {
         router.push('/draws/history' as any);
@@ -30,9 +30,10 @@ export default function DrawsScreen() {
                 <View className="pt-2">
 
                     <CurrentCycleBanner
-                        nextDrawDate={nextDrawDate}
-                        totalPool={1000000}
-                        beneficiariesCount={5}
+                        currentPool={mockDashboardStats.total_pool}
+                        threshold={APP_CONFIG.DISTRIBUTION_THRESHOLD}
+                        beneficiariesCount={APP_CONFIG.WINNERS_PER_DRAW}
+                        onPlayGame={() => router.push('/draws/threshold-game' as any)}
                     />
 
                     <LatestDistributionCard
@@ -46,7 +47,4 @@ export default function DrawsScreen() {
         </Screen>
     );
 }
-
-// Remove old styles
-const styles = {};
 

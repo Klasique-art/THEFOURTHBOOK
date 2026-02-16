@@ -75,7 +75,7 @@ const SettingsList = ({ title, items }: SettingsGroupProps) => {
                         <AppText
                             className="flex-1 font-medium text-base"
                             style={{
-                                color: item.isDestructive ? colors.error : colors.textPrimary
+                                color: item.isDestructive ? colors.error : colors.accent
                             }}
                         >
                             {item.label}

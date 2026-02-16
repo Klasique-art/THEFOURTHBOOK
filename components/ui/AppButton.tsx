@@ -4,7 +4,8 @@ import {
     ActivityIndicator, StyleSheet, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native';
 
 import { useColors } from '@/config/colors';
-
+
+
 import AppText from '@/components/ui/AppText';
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -96,7 +97,7 @@ const AppButton: React.FC<AppButtonProps> = ({
         const variantStyles: Record<ButtonVariant, TextStyle> = {
             primary: { color: colors.white },
             secondary: { color: colors.white },
-            outline: { color: colors.accent },
+            outline: { color: colors.white },
             danger: { color: colors.white },
             ghost: { color: colors.accent },
         };

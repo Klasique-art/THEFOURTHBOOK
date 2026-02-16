@@ -67,6 +67,92 @@ export const mockRecentBeneficiaries: Beneficiary[] = [
     },
 ];
 
+export const mockDecemberBeneficiaries: Beneficiary[] = [
+    {
+        winner_id: 'ben_dec_1001',
+        user_identifier: 'USER_****1122',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_dec_2025',
+        selected_at: '2025-12-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_dec_1002',
+        user_identifier: 'USER_****3344',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_dec_2025',
+        selected_at: '2025-12-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_dec_1003',
+        user_identifier: 'USER_****5566',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_dec_2025',
+        selected_at: '2025-12-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_dec_1004',
+        user_identifier: 'USER_****7788',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_dec_2025',
+        selected_at: '2025-12-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_dec_1005',
+        user_identifier: 'USER_****9900',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_dec_2025',
+        selected_at: '2025-12-28T18:00:00Z',
+    },
+];
+
+export const mockNovemberBeneficiaries: Beneficiary[] = [
+    {
+        winner_id: 'ben_nov_1001',
+        user_identifier: 'USER_****2468',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_nov_2025',
+        selected_at: '2025-11-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_nov_1002',
+        user_identifier: 'USER_****1357',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_nov_2025',
+        selected_at: '2025-11-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_nov_1003',
+        user_identifier: 'USER_****8642',
+        prize_amount: 200000.0,
+        payout_status: 'processing',
+        cycle_id: 'cyc_nov_2025',
+        selected_at: '2025-11-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_nov_1004',
+        user_identifier: 'USER_****7531',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_nov_2025',
+        selected_at: '2025-11-28T18:00:00Z',
+    },
+    {
+        winner_id: 'ben_nov_1005',
+        user_identifier: 'USER_****6420',
+        prize_amount: 200000.0,
+        payout_status: 'completed',
+        cycle_id: 'cyc_nov_2025',
+        selected_at: '2025-11-28T18:00:00Z',
+    },
+];
+
 export const mockDistributionCycles: DistributionCycle[] = [
     {
         cycle_id: 'cyc_jan_2026',
@@ -86,6 +172,17 @@ export const mockDistributionCycles: DistributionCycle[] = [
         total_participants: 50000,
         beneficiaries_count: 5,
         distribution_date: '2025-12-28T18:00:00Z',
+        beneficiaries: mockDecemberBeneficiaries,
+    },
+    {
+        cycle_id: 'cyc_nov_2025',
+        period: 'November 2025',
+        status: 'processing',
+        total_pool: 1000000,
+        total_participants: 50000,
+        beneficiaries_count: 5,
+        distribution_date: '2025-11-28T18:00:00Z',
+        beneficiaries: mockNovemberBeneficiaries,
     },
 ];
 

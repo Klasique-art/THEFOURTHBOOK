@@ -40,27 +40,27 @@ const MembershipProgressCard = ({
                     >
                         <Ionicons name="people" size={20} color="#FFFFFF" />
                     </View>
-                    <AppText className="text-white text-lg font-bold">
+                    <AppText className="text-lg font-bold" color={colors.white}>
                         Our Community Growth
                     </AppText>
                 </View>
                 {isActive && (
                     <View className="bg-green-500 px-3 py-1 rounded-full">
-                        <AppText className="text-white text-xs font-bold">ACTIVE</AppText>
+                        <AppText className="text-xs font-bold" color={colors.white}>ACTIVE</AppText>
                     </View>
                 )}
             </View>
 
             <View className="mb-4">
                 <View className="flex-row items-end justify-between mb-2">
-                    <AppText className="text-white text-4xl font-bold">
+                    <AppText className=" text-4xl font-bold" color={colors.white}>
                         {currentMembers.toLocaleString()}
                     </AppText>
-                    <AppText className="text-white/70 text-base mb-1">
+                    <AppText className="text-base mb-1" color={colors.white}>
                         / {targetMembers.toLocaleString()}
                     </AppText>
                 </View>
-                <AppText className="text-white/80 text-sm">
+                <AppText className="text-sm" color={colors.white}>
                     Members Strong & Growing
                 </AppText>
             </View>
@@ -78,7 +78,7 @@ const MembershipProgressCard = ({
                         }}
                     />
                 </View>
-                <AppText className="text-white/70 text-xs mt-2">
+                <AppText className=" text-xs mt-2" color={colors.white}>
                     {progress.toFixed(1)}% Complete
                 </AppText>
             </View>
@@ -90,8 +90,8 @@ const MembershipProgressCard = ({
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="information-circle" size={16} color={colors.warning} />
-                        <AppText className="text-white text-xs ml-2 flex-1">
-                            {t("We're almost there! Just {{membersNeeded}} more members until we activate monthly payouts together!", {
+                        <AppText className=" text-xs ml-2 flex-1" color={colors.white}>
+                            {t("We're almost there! Just {{membersNeeded}} more members until we accelerate threshold-based distributions together!", {
                                 membersNeeded: membersNeeded.toLocaleString()
                             })}
                         </AppText>
@@ -106,8 +106,8 @@ const MembershipProgressCard = ({
                 >
                     <View className="flex-row items-center">
                         <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                        <AppText className="text-white text-xs ml-2 flex-1">
-                            {t('We did it! Our community unlocked monthly payouts! ??')}
+                        <AppText className=" text-xs ml-2 flex-1">
+                            {t('We did it! Our community unlocked faster threshold-triggered distributions!')}
                         </AppText>
                     </View>
                 </View>

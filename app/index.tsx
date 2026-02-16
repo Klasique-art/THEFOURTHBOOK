@@ -5,13 +5,13 @@ import React from 'react';
 import { ONBOARDING_SEEN_KEY } from '@/data/onboarding';
 
 export default function Index() {
-  const [targetRoute, setTargetRoute] = React.useState<'/onboarding' | '/(tabs)' | null>(null);
+  const [targetRoute, setTargetRoute] = React.useState<'/onboarding' | '/(auth)/login' | null>(null);
 
   React.useEffect(() => {
     const loadInitialRoute = async () => {
       try {
         const seen = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY);
-        setTargetRoute(seen === 'true' ? '/(tabs)' : '/onboarding');
+        setTargetRoute(seen === 'true' ? '/(auth)/login' : '/onboarding');
       } catch {
         setTargetRoute('/onboarding');
       }

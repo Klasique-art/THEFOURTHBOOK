@@ -9,7 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "CFBundleLocalizations": [
+          "en",
+          "fr"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +25,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.shopwit.THEFOURTHBOOK"
     },
     "web": {
       "output": "static",
@@ -45,15 +52,34 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "fr"],
-            "android": ["en", "fr"]
+            "ios": [
+              "en",
+              "fr"
+            ],
+            "android": [
+              "en",
+              "fr"
+            ]
           }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow THEFOURTHBOOK to access your photos so you can upload your ID front image.",
+          "cameraPermission": "Allow THEFOURTHBOOK to use the camera to capture your ID and selfie."
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bd4d0b9b-24bb-4cda-8981-59b7a7d37417"
+      }
     }
   }
 }

@@ -76,3 +76,28 @@ Unless otherwise clarified, it is assumed that the application will be developed
 9. Confirmation and Next Steps
 
 Please confirm in writing that this document accurately represents your intended product, that any required changes or clarifications are communicated before development begins, and that upon confirmation development can commence.
+
+10. New Change (Threshold Game Before Distribution)
+
+The flow is now updated with a mandatory game step when the pool reaches the $1,000,000 threshold and distribution is about to be processed.
+
+Updated behavior:
+- Once the current cycle total_pool reaches $1,000,000, the regular contribution/progress interface is replaced with a game prompt.
+- The app shows: "Threshold met, play this game to get higher chance of winning the next distribution."
+- A call-to-action button takes members to a game screen.
+- The game content is created from admin backend:
+  - Admin uploads one edited image.
+  - Admin sets one question for that image.
+  - Admin defines multiple answer options.
+  - Members select and confirm one answer within the game window.
+- At game closing time, admin triggers winner-boost selection:
+  - Only users with correct answers are eligible.
+  - System randomly selects 10 users from correct respondents.
+  - These 10 users receive a higher chance in the next distribution selection logic.
+
+Minimum implementation assumptions captured:
+- One active game per distribution cycle.
+- One submission per user per game (locked after confirmation).
+- Correct answer is hidden from members and only visible to admin.
+- Game eligibility is limited to members eligible for the current cycle.
+- Audit logs should capture game creation, publication, submissions, and final random boost selection.

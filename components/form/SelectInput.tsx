@@ -122,7 +122,7 @@ const SelectInput = ({
                                 borderBottomColor: colors.border,
                             }}
                         >
-                            <AppText className="text-lg font-nunbold text-white">
+                            <AppText className="text-lg font-nunbold">
                                 {label}
                             </AppText>
                         </View>
@@ -193,3 +193,4 @@ const SelectInput = ({
 };
 
 export default SelectInput;
+

@@ -19,9 +19,6 @@ export default function HomeScreen() {
     const colors = useColors();
     const [refreshing, setRefreshing] = React.useState(false);
 
-    // Calculate next draw date
-    const nextDrawDate = new Date(mockDashboardStats.next_draw_date);
-
     // Map quick actions with navigation handlers
     const quickActionsWithHandlers = homeQuickActions.map(action => ({
         ...action,
@@ -69,12 +66,14 @@ export default function HomeScreen() {
                     totalContributions={`$${mockDashboardStats.total_pool.toLocaleString()}`}
                     yourContributions={mockDashboardStats.user_contributions}
                     totalWinners={mockDashboardStats.total_winners}
-                    nextDrawDate={nextDrawDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    distributionTrigger={`$${APP_CONFIG.DISTRIBUTION_THRESHOLD.toLocaleString()}`}
                 />
 
                 <NextDrawCountdown
-                    drawDate={nextDrawDate}
-                    prizeAmount={`$${APP_CONFIG.MONTHLY_PRIZE_POOL.toLocaleString()}`}
+                    currentPool={mockDashboardStats.total_pool}
+                    threshold={APP_CONFIG.DISTRIBUTION_THRESHOLD}
+                    beneficiariesCount={APP_CONFIG.WINNERS_PER_DRAW}
+                    onPlayGame={() => router.push('/draws/threshold-game' as any)}
                 />
 
                 <RecentWinnersCarousel winners={mockRecentWinners} />

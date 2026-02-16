@@ -26,32 +26,26 @@ export const homeQuickActions: QuickAction[] = [
         color: '#0f0', // success/green
     },
     {
-        id: '4',
-        icon: 'card',
-        label: 'Payment Methods',
-        route: '/wallet',
-        color: '#0ff', // info/blue
-    },
-    {
         id: '7',
         icon: 'help-circle',
         label: 'How We Work',
         route: 'how_it_works',
-        color: '#eee', // textSecondary
+        color: '#3B82F6', // readable blue in light/dark themes
     },
     {
         id: '8',
         icon: 'settings',
         label: 'Settings',
         route: '/(tabs)/profile',
-        color: '#666666', // textSecondary
+        color: '#F38218', // brand accent for better contrast
     },
 ];
 
 // App configuration constants
 export const APP_CONFIG = {
     TARGET_MEMBERS: 50000,
-    MONTHLY_PRIZE_POOL: 1000000, // $1M USD
+    DISTRIBUTION_THRESHOLD: 1000000, // Distribution triggers at $1M pool
+    MONTHLY_PRIZE_POOL: 1000000, // Backward compatibility alias
     WINNERS_PER_DRAW: 5,
     CONTRIBUTION_AMOUNT: 20, // $20 USD
 };

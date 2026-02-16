@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     withSpring,
     withTiming
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '@/config/colors';
 
@@ -14,11 +15,14 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const colors = useColors();
+    const insets = useSafeAreaInsets();
+    const bottomPadding = Math.max(insets.bottom, 10);
 
     return (
         <View style={[styles.container, {
             backgroundColor: colors.background,
             borderTopColor: colors.border,
+            paddingBottom: bottomPadding,
         }]}>
             <View style={styles.tabsContainer}>
                 {state.routes.map((route, index) => {
@@ -184,7 +188,6 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
 const styles = StyleSheet.create({
     container: {
         borderTopWidth: 1,
-        paddingBottom: Platform.OS === 'ios' ? 24 : 8,
         paddingTop: 8,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -2 },

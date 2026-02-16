@@ -70,14 +70,14 @@ interface QuickStatsGridProps {
     totalContributions: string;
     yourContributions: number;
     totalWinners: number;
-    nextDrawDate: string;
+    distributionTrigger: string;
 }
 
 const QuickStatsGrid = ({
     totalContributions,
     yourContributions,
     totalWinners,
-    nextDrawDate
+    distributionTrigger
 }: QuickStatsGridProps) => {
     return (
         <View className="mb-6">
@@ -107,8 +107,8 @@ const QuickStatsGrid = ({
                 />
                 <StatCard
                     icon="calendar-outline"
-                    label="Next Draw"
-                    value={nextDrawDate}
+                    label="Trigger Threshold"
+                    value={distributionTrigger}
                 />
             </View>
         </View>

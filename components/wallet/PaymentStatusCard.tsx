@@ -28,12 +28,12 @@ const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessi
         >
             <View className="flex-row justify-between items-start mb-4">
                 <View>
-                    <AppText className="text-white/80 text-sm font-bold uppercase tracking-wider mb-1">
+                    <AppText className="text-sm font-bold uppercase tracking-wider mb-1">
                         Current Status
                     </AppText>
                     <View className="flex-row items-center">
                         <View className={`w-2 h-2 rounded-full mr-2 bg-white`} />
-                        <AppText className="text-white text-xl font-bold">
+                        <AppText className="text-xl font-bold">
                             {isPaid ? "Active & Covered" : "Action Required"}
                         </AppText>
                     </View>
@@ -48,18 +48,18 @@ const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessi
             </View>
 
             <View className="flex-row items-end mb-6">
-                <AppText className="text-white text-4xl font-extrabold mr-1">
+                <AppText className="text-4xl font-extrabold mr-1">
                     ${amount.toFixed(2)}
                 </AppText>
-                <AppText className="text-white/80 text-lg mb-1 font-medium">/ month</AppText>
+                <AppText className="text-lg mb-1 font-medium">/ month</AppText>
             </View>
 
             <View className="flex-row justify-between items-center">
                 <View>
-                    <AppText className="text-white/70 text-xs">
+                    <AppText className="text-xs">
                         {isPaid ? "Next Payment Due" : "Payment Due By"}
                     </AppText>
-                    <AppText className="text-white font-bold">
+                    <AppText className="font-bold">
                         {new Date(nextDueDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
                     </AppText>
                 </View>
@@ -89,3 +89,4 @@ const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessi
 };
 
 export default PaymentStatusCard;
+

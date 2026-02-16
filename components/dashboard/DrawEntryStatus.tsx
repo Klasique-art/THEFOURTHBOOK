@@ -3,28 +3,31 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { useColors } from '@/config';
-
 import AppText from '@/components/ui/AppText';
+
 interface DrawEntryStatusProps {
     isEntered: boolean;
-    nextDrawDate: string;
+    currentPool: number;
+    threshold: number;
+    winnersCount: number;
 }
 
-const DrawEntryStatus = ({ isEntered, nextDrawDate }: DrawEntryStatusProps) => {
+const DrawEntryStatus = ({ isEntered, currentPool, threshold, winnersCount }: DrawEntryStatusProps) => {
     const colors = useColors();
-    const date = new Date(nextDrawDate);
+    const remaining = Math.max(threshold - currentPool, 0);
+    const prizePerWinner = Math.floor(threshold / winnersCount);
 
     return (
         <View
             className="mb-6 rounded-xl border border-dashed p-4"
             style={{
                 borderColor: isEntered ? colors.success : colors.border,
-                backgroundColor: isEntered ? 'rgba(26, 118, 13, 0.05)' : 'transparent'
+                backgroundColor: isEntered ? 'rgba(26, 118, 13, 0.05)' : 'transparent',
             }}
         >
             <View className="flex-row items-start">
                 <Ionicons
-                    name={isEntered ? "trophy" : "alert-circle-outline"}
+                    name={isEntered ? 'trophy' : 'alert-circle-outline'}
                     size={24}
                     color={isEntered ? colors.success : colors.textSecondary}
                     style={{ marginTop: 2 }}
@@ -34,15 +37,15 @@ const DrawEntryStatus = ({ isEntered, nextDrawDate }: DrawEntryStatusProps) => {
                         className="text-base font-bold mb-1"
                         style={{ color: colors.textPrimary }}
                     >
-                        {isEntered ? "You're entered in the next draw!" : "Contribute to enter next draw"}
+                        {isEntered ? "You're eligible for the next distribution!" : 'Contribute to become eligible'}
                     </AppText>
                     <AppText
                         className="text-sm mb-2"
                         style={{ color: colors.textSecondary }}
                     >
                         {isEntered
-                            ? `Draw happens on ${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`
-                            : "Don't miss your chance to be one of our 5 monthly winners sharing $1,000,000!"}
+                            ? `Distribution runs automatically once the pool reaches $${threshold.toLocaleString()}.`
+                            : `Stay active so you are included when the pool hits $${threshold.toLocaleString()}.`}
                     </AppText>
 
                     {isEntered && (
@@ -51,16 +54,16 @@ const DrawEntryStatus = ({ isEntered, nextDrawDate }: DrawEntryStatusProps) => {
                                 className="text-xs font-bold px-2 py-1 rounded overflow-hidden"
                                 style={{
                                     backgroundColor: colors.accent,
-                                    color: colors.white
+                                    color: colors.white,
                                 }}
                             >
-                                $1,000,000 Pool
+                                ${remaining.toLocaleString()} Remaining
                             </AppText>
                             <AppText
                                 className="text-xs ml-2"
                                 style={{ color: colors.textSecondary }}
                             >
-                                5 Winners • $200k Each
+                                {winnersCount} Winners | ${prizePerWinner.toLocaleString()} Each
                             </AppText>
                         </View>
                     )}
@@ -71,3 +74,4 @@ const DrawEntryStatus = ({ isEntered, nextDrawDate }: DrawEntryStatusProps) => {
 };
 
 export default DrawEntryStatus;
+

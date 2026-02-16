@@ -30,6 +30,7 @@ const Nav = ({ title = "", onPress, showProfile = false, profileImage }: NavProp
             style={{
                 backgroundColor: navBackgroundColor,
                 borderColor: navBorderColor,
+                zIndex: 100,
             }}
             className="w-full flex-row items-center justify-between py-3 px-4 mb-2 rounded-2xl shadow-sm border"
         >

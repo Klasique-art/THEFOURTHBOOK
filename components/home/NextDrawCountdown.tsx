@@ -1,63 +1,68 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import React from 'react';
+import { Animated, Easing, View } from 'react-native';
 
 import { useColors } from '@/config';
-
+import AppButton from '@/components/ui/AppButton';
 
 import AppText from '@/components/ui/AppText';
 interface NextDrawCountdownProps {
-    drawDate: Date;
-    prizeAmount: string;
+    currentPool: number;
+    threshold: number;
+    beneficiariesCount: number;
+    onPlayGame?: () => void;
 }
 
-interface TimeLeft {
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-}
-
-const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) => {
+const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayGame }: NextDrawCountdownProps) => {
     const colors = useColors();
-    const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    const [simulatedPool, setSimulatedPool] = React.useState(currentPool);
+    const progressPercent = Math.min((simulatedPool / threshold) * 100, 100);
+    const remaining = Math.max(threshold - simulatedPool, 0);
+    const prizePerBeneficiary = threshold / beneficiariesCount;
+    const isThresholdMet = simulatedPool >= threshold;
 
-    useEffect(() => {
-        const calculateTimeLeft = () => {
-            const difference = drawDate.getTime() - new Date().getTime();
+    const fillAnim = React.useRef(new Animated.Value(progressPercent)).current;
+    const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
-            if (difference > 0) {
-                setTimeLeft({
-                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                    minutes: Math.floor((difference / 1000 / 60) % 60),
-                    seconds: Math.floor((difference / 1000) % 60),
-                });
-            }
-        };
+    React.useEffect(() => {
+        Animated.timing(fillAnim, {
+            toValue: progressPercent,
+            duration: 500,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: false,
+        }).start();
+    }, [fillAnim, progressPercent]);
 
-        calculateTimeLeft();
-        const timer = setInterval(calculateTimeLeft, 1000);
+    React.useEffect(() => {
+        if (!isThresholdMet) {
+            return;
+        }
 
-        return () => clearInterval(timer);
-    }, [drawDate]);
+        const loop = Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.05,
+                    duration: 700,
+                    easing: Easing.inOut(Easing.quad),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 700,
+                    easing: Easing.inOut(Easing.quad),
+                    useNativeDriver: true,
+                }),
+            ])
+        );
 
-    const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-        <View className="items-center">
-            <View
-                className="w-16 h-16 rounded-xl items-center justify-center mb-2"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-            >
-                <AppText className="text-white text-2xl font-bold">
-                    {value.toString().padStart(2, '0')}
-                </AppText>
-            </View>
-            <AppText className="text-white/70 text-xs uppercase">
-                {label}
-            </AppText>
-        </View>
-    );
+        loop.start();
+        return () => loop.stop();
+    }, [isThresholdMet, pulseAnim]);
+
+    const handleSimulateThreshold = () => {
+        setSimulatedPool(threshold);
+    };
 
     return (
         <LinearGradient
@@ -72,33 +77,101 @@ const NextDrawCountdown = ({ drawDate, prizeAmount }: NextDrawCountdownProps) =>
                     className="w-8 h-8 rounded-full items-center justify-center mr-1"
                     style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                 >
-                    <Ionicons name="time-outline" size={16} color="#FFFFFF" />
+                    <Ionicons name="speedometer-outline" size={16} color="#FFFFFF" />
                 </View>
-                <AppText className="text-white text-lg font-bold">
-                    Our Next Draw Countdown
+                <AppText className="text-lg font-bold" color={colors.white}>
+                    Distribution Trigger Progress
                 </AppText>
             </View>
 
-            <View className="items-center mb-4">
-                <AppText className="text-white/80 text-sm mb-2">
-                    Our Collective Prize Pool
-                </AppText>
-                <AppText className="text-white text-4xl font-bold">
-                    {prizeAmount}
-                </AppText>
-                <AppText className="text-white/70 text-xs mt-1">
-                    Changing 5 lives from our community
-                </AppText>
-            </View>
+            {isThresholdMet ? (
+                <Animated.View
+                    className="rounded-2xl p-4"
+                    style={{
+                        backgroundColor: 'rgba(255,255,255,0.18)',
+                        transform: [{ scale: pulseAnim }],
+                    }}
+                >
+                    <View className="flex-row items-center justify-between">
+                        <View className="mr-3 flex-1">
+                            <AppText className="text-lg font-bold" color={colors.white}>
+                                Threshold Met
+                            </AppText>
+                            <AppText className="text-xs mt-1" color={colors.white}>
+                                Play this game to get higher chance of winning the next distribution.
+                            </AppText>
+                        </View>
+                        <Ionicons name="trophy" size={24} color={colors.white} />
+                    </View>
 
-            <View className="flex-row justify-around mt-4">
-                <TimeUnit value={timeLeft.days} label="Days" />
-                <TimeUnit value={timeLeft.hours} label="Hours" />
-                <TimeUnit value={timeLeft.minutes} label="Mins" />
-                <TimeUnit value={timeLeft.seconds} label="Secs" />
-            </View>
+                    <AppButton
+                        title="Play Game"
+                        icon="game-controller"
+                        onClick={onPlayGame}
+                        fullWidth
+                        style={{ marginTop: 12, backgroundColor: colors.primary }}
+                    />
+                </Animated.View>
+            ) : (
+                <>
+                    <View className="items-center mb-4">
+                        <AppText className="text-sm mb-2" color={colors.white}>
+                            Current Collective Pool
+                        </AppText>
+                        <AppText className="text-4xl font-bold" color={colors.white}>
+                            ${simulatedPool.toLocaleString()}
+                        </AppText>
+                        <AppText className="text-xs mt-1" color={colors.white}>
+                            Distribution runs automatically at ${threshold.toLocaleString()}
+                        </AppText>
+                    </View>
+
+                    <View className="mb-3">
+                        <View className="h-3 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255,255,255,0.28)' }}>
+                            <Animated.View
+                                className="h-full rounded-full"
+                                style={{
+                                    width: fillAnim.interpolate({
+                                        inputRange: [0, 100],
+                                        outputRange: ['0%', '100%'],
+                                    }),
+                                    backgroundColor: '#FFFFFF',
+                                }}
+                            />
+                        </View>
+                        <View className="mt-2 flex-row items-center justify-between">
+                            <AppText className="text-xs" color={colors.white}>
+                                {progressPercent.toFixed(1)}% reached
+                            </AppText>
+                            <AppText className="text-xs" color={colors.white}>
+                                ${remaining.toLocaleString()} remaining
+                            </AppText>
+                        </View>
+                    </View>
+
+                    <View className="flex-row items-center justify-between mt-1">
+                        <AppText className="text-xs" color={colors.white}>
+                            {beneficiariesCount} beneficiaries
+                        </AppText>
+                        <AppText className="text-xs" color={colors.white}>
+                            ${prizePerBeneficiary.toLocaleString()} each
+                        </AppText>
+                    </View>
+
+                    <AppButton
+                        title="Test: hit $1M now"
+                        variant="outline"
+                        size="sm"
+                        icon="flash"
+                        onClick={handleSimulateThreshold}
+                        fullWidth
+                        style={{ marginTop: 12, borderColor: colors.white }}
+                    />
+                </>
+            )}
         </LinearGradient>
     );
 };
 
 export default NextDrawCountdown;
+
