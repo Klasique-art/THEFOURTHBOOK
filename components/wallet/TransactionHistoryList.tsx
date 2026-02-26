@@ -72,7 +72,13 @@ const TransactionHistoryList = ({ transactions }: TransactionHistoryListProps) =
                                     {txn.draw_month || 'Transaction'}
                                 </AppText>
                                 <AppText style={{ color: colors.textSecondary, fontSize: 12 }}>
-                                    {new Date(txn.created_at).toLocaleDateString()}
+                                    {new Date(txn.created_at).toLocaleString(undefined, {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                    })}
                                 </AppText>
                             </View>
                         </View>

@@ -9,11 +9,10 @@ import { PaymentMethod } from '@/data/contributions.dummy';
 import AppText from '@/components/ui/AppText';
 interface PaymentMethodListProps {
     methods: PaymentMethod[];
-    onAddPress: () => void;
     onSelectMethod: (id: string) => void;
 }
 
-const PaymentMethodList = ({ methods, onAddPress, onSelectMethod }: PaymentMethodListProps) => {
+const PaymentMethodList = ({ methods, onSelectMethod }: PaymentMethodListProps) => {
     const colors = useColors();
 
     const getBrandIcon = (brand: string) => {
@@ -33,11 +32,6 @@ const PaymentMethodList = ({ methods, onAddPress, onSelectMethod }: PaymentMetho
                 >
                     Payment Methods
                 </AppText>
-                <TouchableOpacity onPress={onAddPress}>
-                    <AppText style={{ color: colors.accent, fontWeight: '600' }}>
-                        + Add New
-                    </AppText>
-                </TouchableOpacity>
             </View>
 
             {methods.map((method) => (

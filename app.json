@@ -69,7 +69,8 @@
           "photosPermission": "Allow THEFOURTHBOOK to access your photos so you can upload your ID front image.",
           "cameraPermission": "Allow THEFOURTHBOOK to use the camera to capture your ID and selfie."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

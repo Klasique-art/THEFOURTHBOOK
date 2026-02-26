@@ -17,7 +17,29 @@ import SubmitButton from '@/components/form/SubmitButton';
 import AppText from '@/components/ui/AppText';
 import Screen from '@/components/ui/Screen';
 import { useColors } from '@/config/colors';
+import { useAuth } from '@/context/AuthContext';
 import { LoginFormValues, LoginValidationSchema } from '@/data/authValidation';
+
+const extractFirstErrorText = (value: unknown): string | null => {
+    if (typeof value === 'string') return value;
+
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            const found = extractFirstErrorText(item);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    if (value && typeof value === 'object') {
+        for (const nested of Object.values(value as Record<string, unknown>)) {
+            const found = extractFirstErrorText(nested);
+            if (found) return found;
+        }
+    }
+
+    return null;
+};
 
 const LoginFormLoader = () => {
     const { isSubmitting } = useFormikContext<LoginFormValues>();
@@ -26,6 +48,7 @@ const LoginFormLoader = () => {
 
 const LoginScreen = () => {
     const colors = useColors();
+    const { login } = useAuth();
     const [apiError, setApiError] = useState('');
 
     const handleSubmit = async (
@@ -35,17 +58,40 @@ const LoginScreen = () => {
         try {
             setApiError('');
 
-            // Simulate backend login for now.
-            await new Promise((resolve) => setTimeout(resolve, 900));
+            await login({
+                email: values.email.trim(),
+                password: values.password,
+            });
 
             resetForm();
             router.replace('/(tabs)' as Href);
         } catch (error: any) {
-            setApiError(
-                error?.response?.data?.message ||
-                    error?.response?.data?.error ||
-                    'Login failed. Please check your email and password.'
-            );
+            const toErrorPreview = (value: unknown): string | unknown => {
+                if (typeof value === 'string') return value.slice(0, 500);
+                try {
+                    return JSON.stringify(value).slice(0, 500);
+                } catch {
+                    return value;
+                }
+            };
+
+            const logPayload = {
+                message: error?.message,
+                status: error?.response?.status,
+                data_preview: toErrorPreview(error?.response?.data),
+            };
+            console.log(`[LoginScreen] login failed :: ${JSON.stringify(logPayload)}`);
+            console.error(`[LoginScreen] login failed :: ${JSON.stringify(logPayload)}`);
+            const data = error?.response?.data;
+            const parsedError =
+                extractFirstErrorText(data?.error?.details) ||
+                extractFirstErrorText(data?.error?.message) ||
+                extractFirstErrorText(data?.detail) ||
+                extractFirstErrorText(data?.message) ||
+                extractFirstErrorText(data?.error) ||
+                'Login failed. Please check your email and password.';
+
+            setApiError(parsedError);
         }
     };
 

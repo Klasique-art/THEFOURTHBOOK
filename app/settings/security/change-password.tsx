@@ -8,6 +8,7 @@ import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config/colors';
 import { useToast } from '@/context/ToastContext';
 import { passwordSettingsValidationSchema } from '@/data/accountValidation';
+import { authService } from '@/lib/services/authService';
 import { PasswordSettingsFormValues } from '@/types/account.types';
 
 const ChangePasswordScreen = () => {
@@ -23,17 +24,51 @@ const ChangePasswordScreen = () => {
         confirm_password: '',
     };
 
-    const handleSubmit = async (_values: PasswordSettingsFormValues) => {
+    const extractFirstErrorText = (value: unknown): string | null => {
+        if (typeof value === 'string') return value;
+        if (Array.isArray(value)) {
+            for (const item of value) {
+                const found = extractFirstErrorText(item);
+                if (found) return found;
+            }
+            return null;
+        }
+        if (value && typeof value === 'object') {
+            for (const nested of Object.values(value as Record<string, unknown>)) {
+                const found = extractFirstErrorText(nested);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const handleSubmit = async (values: PasswordSettingsFormValues) => {
         setIsLoading(true);
         setApiError('');
 
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1200));
+            await authService.setPassword({
+                current_password: values.current_password,
+                new_password: values.new_password,
+                re_new_password: values.confirm_password,
+            });
+
             showToast('Password changed successfully', { variant: 'success' });
             router.back();
-        } catch (error) {
-            console.log('Simulated change password error:', error);
-            setApiError('Failed to update your password. Please try again.');
+        } catch (error: any) {
+            const data = error?.response?.data;
+            const parsedError =
+                extractFirstErrorText(data?.error?.details?.error?.details) ||
+                extractFirstErrorText(data?.error?.details?.error?.message) ||
+                extractFirstErrorText(data?.error?.details?.message) ||
+                extractFirstErrorText(data?.error?.details) ||
+                extractFirstErrorText(data?.error?.message) ||
+                extractFirstErrorText(data?.detail) ||
+                extractFirstErrorText(data?.message) ||
+                extractFirstErrorText(data?.error) ||
+                'Failed to update your password. Please try again.';
+
+            setApiError(parsedError);
         } finally {
             setIsLoading(false);
         }

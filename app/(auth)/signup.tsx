@@ -1,6 +1,6 @@
 import { Href, router } from 'expo-router';
 import { FormikHelpers, useFormikContext } from 'formik';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Keyboard,
     KeyboardAvoidingView,
@@ -19,7 +19,50 @@ import ToggleField from '@/components/form/ToggleField';
 import AppText from '@/components/ui/AppText';
 import Screen from '@/components/ui/Screen';
 import { useColors } from '@/config/colors';
+import { useAuth } from '@/context/AuthContext';
 import { SignupFormValues, SignupValidationSchema } from '@/data/authValidation';
+import { SignupRequest } from '@/types/auth.types';
+
+const extractFirstErrorText = (value: unknown): string | null => {
+    if (typeof value === 'string') return value;
+
+    if (Array.isArray(value)) {
+        for (const item of value) {
+            const found = extractFirstErrorText(item);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    if (value && typeof value === 'object') {
+        for (const nested of Object.values(value as Record<string, unknown>)) {
+            const found = extractFirstErrorText(nested);
+            if (found) return found;
+        }
+    }
+
+    return null;
+};
+
+const normalizeBackendData = (value: unknown): unknown => {
+    if (typeof value !== 'string') return value;
+    try {
+        return JSON.parse(value);
+    } catch {
+        return value;
+    }
+};
+
+const getNestedValue = (source: unknown, path: string[]): unknown => {
+    let current: unknown = source;
+    for (const key of path) {
+        if (!current || typeof current !== 'object' || !(key in (current as Record<string, unknown>))) {
+            return undefined;
+        }
+        current = (current as Record<string, unknown>)[key];
+    }
+    return current;
+};
 
 const SignupFormLoader = () => {
     const { isSubmitting } = useFormikContext<SignupFormValues>();
@@ -33,6 +76,8 @@ const TermsError = () => {
 
 const SignupScreen = () => {
     const colors = useColors();
+    const { signup } = useAuth();
+    const scrollViewRef = useRef<ScrollView>(null);
     const [apiError, setApiError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -62,29 +107,64 @@ const SignupScreen = () => {
             setApiError('');
             setSuccessMessage('');
 
-            // Simulated request matching API doc payload for POST /auth/register
-            const payload = {
+            const payload: SignupRequest = {
                 email: values.email.trim(),
-                phone: values.phone.trim(),
                 password: values.password,
+                re_password: values.confirm_password,
                 first_name: values.first_name.trim(),
                 last_name: values.last_name.trim(),
+                phone: values.phone.trim(),
                 country: values.country.trim(),
                 date_of_birth: values.date_of_birth,
                 agree_to_terms: values.agree_to_terms,
             };
 
-            await new Promise((resolve) => setTimeout(resolve, 1200));
-            void payload;
+            await signup(payload);
 
-            setSuccessMessage('Account created successfully. Please verify your email.');
+            setSuccessMessage('Account created. Enter the verification code to continue.');
             resetForm();
+            router.replace({
+                pathname: '/(auth)/verify-code',
+                params: { email: payload.email },
+            });
         } catch (error: any) {
-            setApiError(
-                error?.response?.data?.message ||
-                    error?.response?.data?.error ||
-                    'Registration failed. Please review your details and try again.'
+            const toErrorPreview = (value: unknown): string | unknown => {
+                if (typeof value === 'string') return value.slice(0, 500);
+                try {
+                    return JSON.stringify(value).slice(0, 500);
+                } catch {
+                    return value;
+                }
+            };
+
+            const logPayload = {
+                message: error?.message,
+                status: error?.response?.status,
+                data_preview: toErrorPreview(error?.response?.data),
+            };
+            console.log(`[SignupScreen] signup failed :: ${JSON.stringify(logPayload)}`);
+            console.error(`[SignupScreen] signup failed :: ${JSON.stringify(logPayload)}`);
+            const data = normalizeBackendData(error?.response?.data);
+            console.log(
+                `[SignupScreen] backend response data (raw) :: ${
+                    typeof data === 'string' ? data : JSON.stringify(data)
+                }`
             );
+
+            const parsedError =
+                extractFirstErrorText(getNestedValue(data, ['error', 'details', 'error', 'details', 'email'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error', 'details', 'error', 'details'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error', 'details', 'error', 'message'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error', 'details', 'email'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error', 'details'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error', 'message'])) ||
+                extractFirstErrorText(getNestedValue(data, ['detail'])) ||
+                extractFirstErrorText(getNestedValue(data, ['message'])) ||
+                extractFirstErrorText(getNestedValue(data, ['error'])) ||
+                'Registration failed. Please review your details and try again.';
+
+            setApiError(parsedError);
+            scrollViewRef.current?.scrollTo({ y: 0, animated: true });
         }
     };
 
@@ -96,6 +176,7 @@ const SignupScreen = () => {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 16 : 0}
             >
                 <ScrollView
+                    ref={scrollViewRef}
                     className="flex-1"
                     contentContainerStyle={{
                         paddingVertical: 24,
@@ -208,6 +289,15 @@ const SignupScreen = () => {
                                 label="I agree to the terms and conditions"
                                 description="You must agree before creating your account."
                             />
+                            <TouchableOpacity
+                                onPress={() => router.push('/terms' as Href)}
+                                accessibilityRole="button"
+                                accessibilityLabel="View terms and conditions"
+                            >
+                                <AppText className="text-sm font-semibold" color={colors.accent}>
+                                    Read Terms and Conditions
+                                </AppText>
+                            </TouchableOpacity>
                             <TermsError />
 
                             <SubmitButton title="Register as a Member" />

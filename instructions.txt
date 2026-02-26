@@ -259,7 +259,7 @@ Our group's operation begins once our membership surpasses 50,000 members. Until
 
 ## Reference Project
 Learn coding patterns, structure, and conventions from:
-`D:\KLASIQUE STUFF\D-klasique-projects\1mobile\cafatickets_fix\cafa-ticket-mobile`
+`C:\Users\Good\Desktop\Klasique_projects\1mobile\cafa-ticket-mobile`
 
 ## Tech Stack
 - **Framework**: Expo SDK 54
@@ -1351,9 +1351,10 @@ export const useAuth = () => {
 // lib/apiClient.ts
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { API_BASE_URL } from '@/config/settings';
 
 const apiClient = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  baseURL: API_BASE_URL,
   timeout: 10000,
 });
 

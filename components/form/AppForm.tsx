@@ -23,7 +23,7 @@ const AppForm = <Values extends FormikValues>({
             {...rest}
         >
             {() => (
-                <View className={`flex flex-col gap-4 ${formStyles || ''}`}>
+                <View className={`relative flex flex-col gap-4 ${formStyles || ''}`}>
                     {children}
                 </View>
             )}

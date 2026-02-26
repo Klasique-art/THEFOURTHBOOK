@@ -5,14 +5,24 @@ import { View } from 'react-native';
 
 import AppText from '@/components/ui/AppText';
 type Props = {
-    error?: string;
+    error?: unknown;
     visible?: boolean;
 };
 
 const AppErrorMessage = ({ error, visible }: Props) => {
     const colors = useColors();
+    const normalizedError = (() => {
+        if (!error) return '';
+        if (typeof error === 'string') return error;
+        if (typeof error === 'number' || typeof error === 'boolean') return String(error);
+        try {
+            return JSON.stringify(error);
+        } catch {
+            return 'Something went wrong. Please try again.';
+        }
+    })();
 
-    if (!error || !visible) return null;
+    if (!normalizedError || !visible) return null;
 
     return (
         <View
@@ -34,7 +44,7 @@ const AppErrorMessage = ({ error, visible }: Props) => {
                 className="flex-1 text-sm font-nunmedium leading-tight"
                 style={{ color: colors.error }}
             >
-                {error}
+                {normalizedError}
             </AppText>
         </View>
     );

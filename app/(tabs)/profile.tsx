@@ -14,12 +14,14 @@ import { SupportedLanguage } from '@/config/i18n';
 import { ONBOARDING_SEEN_KEY } from '@/data/onboarding';
 import { KYC_VERIFIED_KEY } from '@/data/verification';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { mockCurrentUser } from '@/data/userData.dummy';
 
 export default function ProfileScreen() {
     const colors = useColors();
     const { t } = useTranslation();
     const { language, setLanguage } = useLanguage();
+    const { logout, user } = useAuth();
     const [isLanguageModalVisible, setIsLanguageModalVisible] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
     const logoutSheetRef = useRef<AppBottomSheetRef>(null);
@@ -106,9 +108,15 @@ export default function ProfileScreen() {
         logoutSheetRef.current?.close();
     };
 
-    const handleLogoutConfirm = () => {
-        console.log('Logging out...');
-        logoutSheetRef.current?.close();
+    const handleLogoutConfirm = async () => {
+        try {
+            await logout();
+            logoutSheetRef.current?.close();
+            router.replace('/(auth)/login');
+        } catch (error) {
+            console.error('[ProfileScreen] logout failed', error);
+            logoutSheetRef.current?.close();
+        }
     };
 
     return (
@@ -116,9 +124,9 @@ export default function ProfileScreen() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
                 <View className="pt-2">
                     <ProfileHeader
-                        name={`${mockCurrentUser.first_name} ${mockCurrentUser.last_name}`}
-                        email={mockCurrentUser.email}
-                        joinDate={mockCurrentUser.created_at}
+                        name={`${user?.first_name ?? mockCurrentUser.first_name} ${user?.last_name ?? mockCurrentUser.last_name}`}
+                        email={user?.email ?? mockCurrentUser.email}
+                        joinDate={user?.created_at ?? mockCurrentUser.created_at}
                         isVerified={isVerified}
                         onVerifyPress={() => router.push('/verification')}
                     />

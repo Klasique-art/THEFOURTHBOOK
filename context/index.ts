@@ -8,3 +8,6 @@ export { ToastProvider, useToast } from './ToastContext';
 // Language Context
 export { LanguageProvider, useLanguage } from './LanguageContext';
 
+// Auth Context
+export { AuthProvider, useAuth } from './AuthContext';
+

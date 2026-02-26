@@ -2,25 +2,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Redirect } from 'expo-router';
 import React from 'react';
 
+import { useAuth } from '@/context/AuthContext';
 import { ONBOARDING_SEEN_KEY } from '@/data/onboarding';
 
 export default function Index() {
-  const [targetRoute, setTargetRoute] = React.useState<'/onboarding' | '/(auth)/login' | null>(null);
+  const { isAuthenticated, isLoading } = useAuth();
+  const [hasSeenOnboarding, setHasSeenOnboarding] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
-    const loadInitialRoute = async () => {
+    const loadOnboardingState = async () => {
       try {
         const seen = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY);
-        setTargetRoute(seen === 'true' ? '/(auth)/login' : '/onboarding');
+        setHasSeenOnboarding(seen === 'true');
       } catch {
-        setTargetRoute('/onboarding');
+        setHasSeenOnboarding(false);
       }
     };
 
-    void loadInitialRoute();
+    void loadOnboardingState();
   }, []);
 
-  if (!targetRoute) return null;
+  if (isLoading || hasSeenOnboarding === null) return null;
 
-  return <Redirect href={targetRoute} />;
+  if (isAuthenticated) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  if (!hasSeenOnboarding) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  return <Redirect href="/(auth)/login" />;
 }

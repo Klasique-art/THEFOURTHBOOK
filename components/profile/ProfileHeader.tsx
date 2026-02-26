@@ -18,6 +18,13 @@ const ProfileHeader = ({ name, email, joinDate, isVerified, onVerifyPress }: Pro
     const colors = useColors();
     const { t } = useTranslation();
 
+    const joinedDate = new Date(joinDate);
+    const joinedLabel = joinedDate.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+
     return (
         <View className="items-center my-8">
             <View className="relative mx-auto p-3">
@@ -72,7 +79,7 @@ const ProfileHeader = ({ name, email, joinDate, isVerified, onVerifyPress }: Pro
                 }}
             >
                 <AppText style={{ color: colors.textSecondary, fontSize: 12 }}>
-                    Member since {new Date(joinDate).getFullYear()}
+                    Joined {joinedLabel}
                 </AppText>
             </View>
         </View>

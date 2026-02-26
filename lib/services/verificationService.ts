@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import {
     StartVerificationRequest,
     StartVerificationResponse,
@@ -7,14 +5,9 @@ import {
     UploadSelfieRequest,
     VerificationStatusResponse,
 } from '@/types/verification.types';
+import client from '@/lib/client';
 
 const USE_MOCK_VERIFICATION_API = true;
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-
-const apiClient = axios.create({
-    baseURL: API_BASE_URL,
-    timeout: 15000,
-});
 
 const toFilePart = (asset: { uri: string; fileName: string; mimeType: string }) => ({
     uri: asset.uri,
@@ -34,7 +27,7 @@ export const verificationService = {
             };
         }
 
-        const response = await apiClient.post('/kyc/verification/start', payload);
+        const response = await client.post('/kyc/verification/start', payload);
         return response.data;
     },
 
@@ -53,7 +46,7 @@ export const verificationService = {
         formData.append('document_type', payload.document_type);
         formData.append('id_front_image', toFilePart(payload.id_front_image) as any);
 
-        const response = await apiClient.post('/kyc/verification/id-front', formData, {
+        const response = await client.post('/kyc/verification/id-front', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
         return response.data;
@@ -73,7 +66,7 @@ export const verificationService = {
         formData.append('verification_id', payload.verification_id);
         formData.append('selfie_image', toFilePart(payload.selfie_image) as any);
 
-        const response = await apiClient.post('/kyc/verification/selfie', formData, {
+        const response = await client.post('/kyc/verification/selfie', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
         return response.data;
