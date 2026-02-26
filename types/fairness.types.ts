@@ -24,3 +24,17 @@ export interface FairnessAuditReport {
     expected_draw_fingerprint: string;
 }
 
+export interface DrawVerificationData {
+    id: string;
+    draw_id: string;
+    month: string;
+    status: string;
+    total_pool: string;
+    prize_per_winner: string;
+    number_of_winners: number;
+    participants_count: number;
+    algorithm: string;
+    random_seed: string;
+    verification_hash: string;
+}
+

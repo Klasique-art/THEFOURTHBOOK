@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { Nav, Screen } from '@/components';
+import AppButton from '@/components/ui/AppButton';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
 import { distributionService } from '@/lib/services/distributionService';
@@ -24,6 +25,7 @@ const DrawBeneficiariesScreen = () => {
     const { cycleId } = useLocalSearchParams<{ cycleId: string }>();
 
     const [cycle, setCycle] = React.useState<DistributionHistoryItem | null>(null);
+    const [drawInternalId, setDrawInternalId] = React.useState<string | null>(null);
     const [beneficiaries, setBeneficiaries] = React.useState<DistributionBeneficiary[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
@@ -45,6 +47,7 @@ const DrawBeneficiariesScreen = () => {
                 const response = await distributionService.getDistributionDetail(String(cycleId));
                 if (!isMounted) return;
                 setCycle(response.cycle);
+                setDrawInternalId(response.draw_internal_id);
                 setBeneficiaries(response.beneficiaries);
             } catch (err) {
                 if (!isMounted) return;
@@ -100,6 +103,22 @@ const DrawBeneficiariesScreen = () => {
                             <AppText className="mt-2 text-base font-semibold" style={{ color: colors.textPrimary }}>
                                 Pool: {formatCurrency(cycle.total_pool)}
                             </AppText>
+                            <AppButton
+                                title="Check Fairness"
+                                variant="outline"
+                                icon="shield-checkmark"
+                                fullWidth
+                                style={{ marginTop: 12 }}
+                                onClick={() =>
+                                    drawInternalId
+                                        ? router.push({
+                                            pathname: '/draws/fairness',
+                                            params: { drawId: drawInternalId, drawCode: cycle.cycle_id },
+                                        })
+                                        : undefined
+                                }
+                                disabled={!drawInternalId}
+                            />
                         </View>
                     )}
 

@@ -22,6 +22,7 @@ export interface DistributionHistoryResponse {
 }
 
 export interface DistributionDetailResponse {
+    draw_internal_id: string;
     cycle: DistributionHistoryItem;
     beneficiaries: DistributionBeneficiary[];
 }
@@ -40,5 +41,27 @@ export interface MySelectionStatusResponse {
     user_identifier: string;
     total_selection_count: number;
     total_won_amount: number;
+    currency: string;
     selections: MySelectionItem[];
+}
+
+export interface PublicPlatformStats {
+    total_users: number;
+    total_draws_completed: number;
+    total_amount_distributed: number;
+    total_winners: number;
+    currency: string;
+}
+
+export interface PublicRecentDraw {
+    month: string;
+    draw_id: string;
+    participants: number;
+    prize_per_winner: number;
+    currency: string;
+}
+
+export interface PublicStatisticsResponse {
+    platform_stats: PublicPlatformStats;
+    recent_draws: PublicRecentDraw[];
 }

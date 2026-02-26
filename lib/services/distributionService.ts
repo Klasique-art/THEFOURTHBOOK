@@ -1,81 +1,157 @@
-import { mockDistributionCycles } from '@/data/dummy.draws';
+import client from '@/lib/client';
 import {
-    DistributionBeneficiary,
     DistributionDetailResponse,
-    DistributionHistoryItem,
     DistributionHistoryResponse,
-    MySelectionItem,
     MySelectionStatusResponse,
+    PublicStatisticsResponse,
 } from '@/types/distribution.types';
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const monthToPeriod = (month: string) => {
+    const [year, monthNum] = month.split('-');
+    const date = new Date(Number(year), Number(monthNum) - 1, 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
 
-const toHistoryItem = (cycle: any): DistributionHistoryItem => ({
-    cycle_id: cycle.cycle_id,
-    period: cycle.period,
-    status: cycle.status,
-    total_pool: cycle.total_pool,
-    total_participants: cycle.total_participants,
-    beneficiaries_count: cycle.beneficiaries_count,
-    distribution_date: cycle.distribution_date,
-});
-
-const toBeneficiary = (item: any): DistributionBeneficiary => ({
-    winner_id: item.winner_id,
-    user_identifier: item.user_identifier,
-    prize_amount: item.prize_amount,
-    payout_status: item.payout_status,
-    cycle_id: item.cycle_id ?? '',
-    selected_at: item.selected_at ?? new Date().toISOString(),
-});
+const normalizeDrawStatus = (status: string): 'active' | 'completed' | 'processing' => {
+    if (status === 'active' || status === 'completed' || status === 'processing') {
+        return status;
+    }
+    return 'processing';
+};
 
 export const distributionService = {
+    async getPublicStatistics(): Promise<PublicStatisticsResponse> {
+        const response = await client.get<{
+            success: boolean;
+            data: PublicStatisticsResponse;
+        }>('/public/statistics/');
+        return response.data.data;
+    },
+
     async getDistributionHistory(): Promise<DistributionHistoryResponse> {
-        await wait(450);
+        const response = await client.get<{
+            success: boolean;
+            data: {
+                draws: {
+                    draw_id: string;
+                    month: string;
+                    total_pool: string;
+                    currency: string;
+                    prize_per_winner: string;
+                    participants_count: number;
+                    status: 'active' | 'completed' | 'processing';
+                }[];
+                total_count: number;
+            };
+        }>('/public/draws/stats/');
+
         return {
-            items: mockDistributionCycles.map(toHistoryItem),
+            items: (response.data.data.draws ?? []).map((draw) => ({
+                cycle_id: draw.draw_id,
+                period: monthToPeriod(draw.month),
+                status: draw.status,
+                total_pool: Number(draw.total_pool),
+                total_participants: draw.participants_count,
+                beneficiaries_count: Number(draw.prize_per_winner) > 0 ? Math.round(Number(draw.total_pool) / Number(draw.prize_per_winner)) : 0,
+                distribution_date: `${draw.month}-01T00:00:00Z`,
+            })),
         };
     },
 
     async getDistributionDetail(cycleId: string): Promise<DistributionDetailResponse> {
-        await wait(450);
-        const cycle = mockDistributionCycles.find((item) => item.cycle_id === cycleId);
+        const response = await client.get<{
+            success: boolean;
+            data: {
+                id: string;
+                draw_id: string;
+                month: string;
+                status: 'active' | 'completed' | 'processing';
+                payout_status: string;
+                total_pool: string;
+                currency: string;
+                prize_per_winner: string;
+                number_of_winners: number;
+                draw_date: string;
+                participants_count: number;
+                beneficiaries_count: number;
+                beneficiaries: {
+                    beneficiary_id: string;
+                    user_id: string;
+                    prize_amount: string;
+                    payout_status: 'pending' | 'processing' | 'completed' | 'failed' | 'paid';
+                    payout_reference: string | null;
+                }[];
+            };
+        }>(`/public/draws/stats/${cycleId}/`);
 
-        if (!cycle) {
-            throw new Error('Distribution cycle not found.');
-        }
-
+        const draw = response.data.data;
         return {
-            cycle: toHistoryItem(cycle),
-            beneficiaries: (cycle.beneficiaries ?? []).map(toBeneficiary),
+            draw_internal_id: draw.id,
+            cycle: {
+                cycle_id: draw.draw_id,
+                period: monthToPeriod(draw.month),
+                status: draw.status,
+                total_pool: Number(draw.total_pool),
+                total_participants: draw.participants_count,
+                beneficiaries_count: draw.beneficiaries_count,
+                distribution_date: draw.draw_date,
+            },
+            beneficiaries: (draw.beneficiaries ?? []).map((beneficiary) => ({
+                winner_id: beneficiary.beneficiary_id,
+                user_identifier: beneficiary.user_id,
+                prize_amount: Number(beneficiary.prize_amount),
+                payout_status: beneficiary.payout_status === 'paid' ? 'completed' : beneficiary.payout_status,
+                cycle_id: draw.draw_id,
+                selected_at: draw.draw_date,
+            })),
         };
     },
 
-    async getMySelectionStatus(userIdentifier: string): Promise<MySelectionStatusResponse> {
-        await wait(350);
+    async getMySelectionStatus(): Promise<MySelectionStatusResponse> {
+        const response = await client.get<{
+            success: boolean;
+            data: {
+                selections: {
+                    id: string;
+                    draw_id: string;
+                    draw_month: string;
+                    draw_status: string;
+                    draw_registration_closes_at: string;
+                    payment_reference: string;
+                    is_winner: boolean;
+                    prize_amount: string;
+                    payout_status: 'pending' | 'processing' | 'completed' | 'failed' | 'paid';
+                    payout_reference: string | null;
+                    created_at: string;
+                }[];
+                statistics: {
+                    times_selected: number;
+                    total_won: number;
+                    currency: string;
+                };
+            };
+        }>('/draws/my-selection-history/');
 
-        const selections: MySelectionItem[] = mockDistributionCycles
-            .flatMap((cycle) =>
-                (cycle.beneficiaries ?? [])
-                    .filter((beneficiary) => beneficiary.user_identifier === userIdentifier)
-                    .map((beneficiary) => ({
-                        cycle_id: cycle.cycle_id,
-                        period: cycle.period,
-                        distribution_date: cycle.distribution_date,
-                        prize_amount: beneficiary.prize_amount,
-                        payout_status: beneficiary.payout_status,
-                        selected_at: beneficiary.selected_at ?? cycle.distribution_date,
-                        winner_id: beneficiary.winner_id,
-                    }))
-            )
+        const payload = response.data.data;
+        const selections = (payload.selections ?? [])
+            .filter((item) => item.is_winner)
+            .map((item) => ({
+                cycle_id: item.draw_id,
+                period: monthToPeriod(item.draw_month),
+                distribution_date: item.draw_registration_closes_at,
+                prize_amount: Number(item.prize_amount),
+                payout_status: item.payout_status === 'paid' ? 'completed' : item.payout_status,
+                selected_at: item.created_at,
+                winner_id: item.id,
+                draw_status: normalizeDrawStatus(item.draw_status),
+            }))
             .sort((a, b) => new Date(b.selected_at).getTime() - new Date(a.selected_at).getTime());
 
-        const totalWonAmount = selections.reduce((sum, item) => sum + item.prize_amount, 0);
-
         return {
-            user_identifier: userIdentifier,
-            total_selection_count: selections.length,
-            total_won_amount: totalWonAmount,
+            user_identifier: 'current_user',
+            total_selection_count: payload.statistics?.times_selected ?? selections.length,
+            total_won_amount: payload.statistics?.total_won ?? 0,
+            currency: payload.statistics?.currency ?? 'USD',
             selections,
         };
     },

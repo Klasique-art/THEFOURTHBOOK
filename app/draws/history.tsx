@@ -80,6 +80,22 @@ const DrawsHistoryScreen = () => {
                             </View>
                         ) : null
                     }
+                    ListEmptyComponent={
+                        !error ? (
+                            <View
+                                className="mt-10 items-center rounded-2xl border p-6"
+                                style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
+                            >
+                                <Ionicons name="receipt-outline" size={28} color={colors.textSecondary} />
+                                <AppText className="mt-3 text-base font-semibold" style={{ color: colors.textPrimary }}>
+                                    No distributions yet
+                                </AppText>
+                                <AppText className="mt-1 text-center text-sm" style={{ color: colors.textSecondary }}>
+                                    Completed draws will appear here once available.
+                                </AppText>
+                            </View>
+                        ) : null
+                    }
                     contentContainerStyle={{ paddingBottom: 24 }}
                     renderItem={({ item: cycle }) => (
                         <Pressable

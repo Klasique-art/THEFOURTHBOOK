@@ -7,12 +7,12 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 import { Nav, Screen } from '@/components';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
-import { mockCurrentUser } from '@/data/userData.dummy';
+import { useAuth } from '@/context/AuthContext';
 import { distributionService } from '@/lib/services/distributionService';
 import { MySelectionItem, MySelectionStatusResponse } from '@/types/distribution.types';
 
-const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount);
+const formatCurrency = (amount: number, currency = 'USD') =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount);
 
 const statusColorMap: Record<MySelectionItem['payout_status'], string> = {
     pending: '#F8B735',
@@ -21,14 +21,9 @@ const statusColorMap: Record<MySelectionItem['payout_status'], string> = {
     failed: '#DC2626',
 };
 
-const toUserIdentifier = (userId: string) => {
-    const digits = userId.replace(/\D/g, '');
-    const last4 = digits.slice(-4) || '0000';
-    return `USER_****${last4}`;
-};
-
 const MySelectionStatusScreen = () => {
     const colors = useColors();
+    const { user } = useAuth();
     const [status, setStatus] = React.useState<MySelectionStatusResponse | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
@@ -40,10 +35,12 @@ const MySelectionStatusScreen = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const userIdentifier = toUserIdentifier(mockCurrentUser.user_id);
-                const response = await distributionService.getMySelectionStatus(userIdentifier);
+                const response = await distributionService.getMySelectionStatus();
                 if (isMounted) {
-                    setStatus(response);
+                    setStatus({
+                        ...response,
+                        user_identifier: user?.user_id ?? 'current_user',
+                    });
                 }
             } catch (err) {
                 if (isMounted) {
@@ -61,7 +58,7 @@ const MySelectionStatusScreen = () => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [user?.user_id]);
 
     const hasSelections = (status?.total_selection_count ?? 0) > 0;
 
@@ -107,7 +104,7 @@ const MySelectionStatusScreen = () => {
                             </View>
                             <View className="items-end">
                                 <AppText className="text-2xl font-bold" style={{ color: colors.accent }}>
-                                    {formatCurrency(status?.total_won_amount ?? 0)}
+                                    {formatCurrency(status?.total_won_amount ?? 0, status?.currency ?? 'USD')}
                                 </AppText>
                                 <AppText className="text-xs" style={{ color: colors.textSecondary }}>
                                     Total Won
@@ -168,7 +165,7 @@ const MySelectionStatusScreen = () => {
                                         Selected: {new Date(item.selected_at).toLocaleDateString('en-US')}
                                     </AppText>
                                     <AppText className="mt-2 text-lg font-bold" style={{ color: colors.accent }}>
-                                        {formatCurrency(item.prize_amount)}
+                                        {formatCurrency(item.prize_amount, status?.currency ?? 'USD')}
                                     </AppText>
                                 </View>
                             )}

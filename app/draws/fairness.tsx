@@ -1,42 +1,51 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { Nav, Screen } from '@/components';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
-import { mockDistributionCycles } from '@/data/dummy.draws';
-import { mockFairnessProofs } from '@/data/fairness.dummy';
 import { fairnessService } from '@/lib/services/fairnessService';
-import { FairnessAuditReport, FairnessProofInput } from '@/types/fairness.types';
+import { DrawVerificationData } from '@/types/fairness.types';
 
-const shortenHash = (value: string) => `${value.slice(0, 12)}...${value.slice(-12)}`;
+const toPeriod = (month: string) => {
+    const [year, monthNum] = month.split('-');
+    const date = new Date(Number(year), Number(monthNum) - 1, 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+};
+
+const shortenValue = (value: string) => (value.length > 48 ? `${value.slice(0, 24)}...${value.slice(-24)}` : value);
 
 const FairnessScreen = () => {
     const colors = useColors();
-    const [selectedCycleId, setSelectedCycleId] = React.useState(mockDistributionCycles[0]?.cycle_id ?? '');
-    const [report, setReport] = React.useState<FairnessAuditReport | null>(null);
-    const [proof, setProof] = React.useState<FairnessProofInput | null>(null);
-    const [isLoading, setIsLoading] = React.useState(true);
+    const router = useRouter();
+    const { drawId, drawCode } = useLocalSearchParams<{ drawId?: string; drawCode?: string }>();
+
+    const [verification, setVerification] = React.useState<DrawVerificationData | null>(null);
+    const [isLoading, setIsLoading] = React.useState(Boolean(drawId));
     const [error, setError] = React.useState<string | null>(null);
 
     React.useEffect(() => {
         let isMounted = true;
 
-        const loadAudit = async () => {
-            if (!selectedCycleId) return;
+        const loadVerification = async () => {
+            if (!drawId) {
+                setIsLoading(false);
+                setError('Open this page from a draw details screen to verify fairness.');
+                return;
+            }
 
             setIsLoading(true);
             setError(null);
 
             try {
-                const response = await fairnessService.getFairnessAudit(selectedCycleId);
+                const response = await fairnessService.getDrawVerification(String(drawId));
                 if (!isMounted) return;
-                setProof(response.proof);
-                setReport(response.report);
+                setVerification(response);
             } catch (err) {
                 if (!isMounted) return;
-                setError(err instanceof Error ? err.message : 'Could not load fairness audit.');
+                setError(err instanceof Error ? err.message : 'Could not load fairness verification.');
             } finally {
                 if (isMounted) {
                     setIsLoading(false);
@@ -44,168 +53,124 @@ const FairnessScreen = () => {
             }
         };
 
-        void loadAudit();
+        void loadVerification();
 
         return () => {
             isMounted = false;
         };
-    }, [selectedCycleId]);
-
-    const allChecksPassed = report?.checks.every((check) => check.passed) ?? false;
+    }, [drawId]);
 
     return (
         <Screen>
             <Nav title="Verify Fairness" />
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
-                <View
-                    className="mb-4 rounded-2xl border p-4"
-                    style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
-                >
-                    <AppText className="text-sm leading-6" style={{ color: colors.textSecondary }}>
-                        Re-run the same proof inputs used at draw time and validate each integrity checkpoint.
-                    </AppText>
-                    <View className="mt-3 flex-row flex-wrap">
-                        {mockDistributionCycles
-                            .filter((cycle) => mockFairnessProofs.some((proofItem) => proofItem.cycle_id === cycle.cycle_id))
-                            .map((cycle) => {
-                                const selected = cycle.cycle_id === selectedCycleId;
-                                return (
-                                    <Pressable
-                                        key={cycle.cycle_id}
-                                        onPress={() => setSelectedCycleId(cycle.cycle_id)}
-                                        className="mb-2 mr-2 rounded-full border px-3 py-2"
-                                        style={{
-                                            borderColor: selected ? colors.accent : colors.border,
-                                            backgroundColor: selected ? `${colors.accent}15` : colors.background,
-                                        }}
-                                    >
-                                        <AppText className="text-xs font-semibold" style={{ color: selected ? colors.accent : colors.textPrimary }}>
-                                            {cycle.period}
-                                        </AppText>
-                                    </Pressable>
-                                );
-                            })}
-                    </View>
-                </View>
-
                 {isLoading ? (
-                    <View className="mt-4 items-center">
+                    <View className="mt-6 items-center">
                         <ActivityIndicator color={colors.accent} />
-                        <AppText className="mt-2 text-sm" style={{ color: colors.textSecondary }}>
-                            Running fairness audit...
+                        <AppText className="mt-3 text-sm" style={{ color: colors.textSecondary }}>
+                            Loading draw verification...
                         </AppText>
                     </View>
-                ) : (
-                    <View>
-                        {error && (
-                            <View
-                                className="mb-3 rounded-2xl border p-3"
-                                style={{ borderColor: `${colors.error}40`, backgroundColor: `${colors.error}10` }}
-                            >
-                                <AppText className="text-sm" style={{ color: colors.error }}>
-                                    {error}
-                                </AppText>
-                            </View>
-                        )}
+                ) : null}
 
-                        {report && (
-                            <>
-                                <View
-                                    className="mb-3 rounded-2xl border p-4"
-                                    style={{
-                                        borderColor: allChecksPassed ? `${colors.success}40` : `${colors.warning}40`,
-                                        backgroundColor: allChecksPassed ? `${colors.success}12` : `${colors.warning}12`,
-                                    }}
-                                >
-                                    <View className="flex-row items-center">
-                                        <Ionicons
-                                            name={allChecksPassed ? 'checkmark-circle' : 'alert-circle'}
-                                            size={22}
-                                            color={allChecksPassed ? colors.success : colors.warning}
-                                        />
-                                        <AppText
-                                            className="ml-2 text-base font-bold"
-                                            style={{ color: allChecksPassed ? colors.success : colors.warning }}
-                                        >
-                                            {allChecksPassed ? 'Audit Passed' : 'Audit Requires Review'}
-                                        </AppText>
-                                    </View>
-                                    <AppText className="mt-2 text-sm" style={{ color: colors.textSecondary }}>
-                                        {report.period} integrity checks: {report.checks.filter((check) => check.passed).length}/
-                                        {report.checks.length} passed.
-                                    </AppText>
-                                </View>
-
-                                <View
-                                    className="mb-3 rounded-2xl border p-4"
-                                    style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
-                                >
-                                    <AppText className="mb-2 text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                        Proof Inputs
-                                    </AppText>
-                                    <AppText className="text-xs" style={{ color: colors.textSecondary }}>
-                                        Algorithm: {proof?.algorithm_version}
-                                    </AppText>
-                                    <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                        Commitment Time: {proof?.committed_at}
-                                    </AppText>
-                                    <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                        Public Seed Source: {proof?.public_seed_source}
-                                    </AppText>
-                                    <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                        Server Seed Hash: {proof ? shortenHash(proof.server_seed_hash) : '-'}
-                                    </AppText>
-                                    <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                        Server Seed Reveal: {proof ? shortenHash(proof.server_seed_reveal) : '-'}
-                                    </AppText>
-                                </View>
-
-                                <View
-                                    className="mb-3 rounded-2xl border p-4"
-                                    style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
-                                >
-                                    <AppText className="mb-2 text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                        Integrity Checks
-                                    </AppText>
-                                    {report.checks.map((check) => (
-                                        <View key={check.id} className="mb-3 flex-row items-start">
-                                            <Ionicons
-                                                name={check.passed ? 'checkmark-circle' : 'close-circle'}
-                                                size={18}
-                                                color={check.passed ? colors.success : colors.error}
-                                                style={{ marginTop: 1 }}
-                                            />
-                                            <View className="ml-2 flex-1">
-                                                <AppText className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                                    {check.label}
-                                                </AppText>
-                                                <AppText className="text-xs" style={{ color: colors.textSecondary }}>
-                                                    {check.detail}
-                                                </AppText>
-                                            </View>
-                                        </View>
-                                    ))}
-                                </View>
-
-                                <View
-                                    className="rounded-2xl border p-4"
-                                    style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
-                                >
-                                    <AppText className="mb-2 text-sm font-semibold" style={{ color: colors.textPrimary }}>
-                                        Draw Fingerprint
-                                    </AppText>
-                                    <AppText className="text-xs" style={{ color: colors.textSecondary }}>
-                                        Published: {shortenHash(report.expected_draw_fingerprint)}
-                                    </AppText>
-                                    <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                        Recomputed: {shortenHash(report.computed_draw_fingerprint)}
-                                    </AppText>
-                                </View>
-                            </>
-                        )}
+                {error ? (
+                    <View
+                        className="mb-3 rounded-2xl border p-3"
+                        style={{ borderColor: `${colors.error}40`, backgroundColor: `${colors.error}10` }}
+                    >
+                        <AppText className="text-sm" style={{ color: colors.error }}>
+                            {error}
+                        </AppText>
                     </View>
-                )}
+                ) : null}
+
+                {verification ? (
+                    <>
+                        <View
+                            className="mb-3 rounded-2xl border p-4"
+                            style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
+                        >
+                            <View className="flex-row items-center justify-between">
+                                <AppText className="text-base font-bold" style={{ color: colors.textPrimary }}>
+                                    {verification.draw_id}
+                                </AppText>
+                                <View className="rounded-full px-3 py-1" style={{ backgroundColor: `${colors.success}20` }}>
+                                    <AppText className="text-xs font-semibold uppercase" style={{ color: colors.success }}>
+                                        {verification.status}
+                                    </AppText>
+                                </View>
+                            </View>
+                            <AppText className="mt-2 text-sm" style={{ color: colors.textSecondary }}>
+                                Period: {toPeriod(verification.month)}
+                            </AppText>
+                            <AppText className="mt-1 text-sm" style={{ color: colors.textSecondary }}>
+                                Participants: {verification.participants_count.toLocaleString()}
+                            </AppText>
+                            <AppText className="mt-1 text-sm" style={{ color: colors.textSecondary }}>
+                                Winners: {verification.number_of_winners}
+                            </AppText>
+                        </View>
+
+                        <View
+                            className="mb-3 rounded-2xl border p-4"
+                            style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
+                        >
+                            <AppText className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                                Draw Configuration
+                            </AppText>
+                            <AppText className="mt-2 text-xs" style={{ color: colors.textSecondary }}>
+                                Total Pool: {verification.total_pool}
+                            </AppText>
+                            <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
+                                Prize Per Winner: {verification.prize_per_winner}
+                            </AppText>
+                            <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
+                                Algorithm: {verification.algorithm}
+                            </AppText>
+                        </View>
+
+                        <View
+                            className="rounded-2xl border p-4"
+                            style={{ borderColor: colors.border, backgroundColor: colors.backgroundAlt }}
+                        >
+                            <AppText className="text-sm font-semibold" style={{ color: colors.textPrimary }}>
+                                Verification Values
+                            </AppText>
+                            <AppText className="mt-2 text-xs" style={{ color: colors.textSecondary }}>
+                                Random Seed
+                            </AppText>
+                            <AppText className="mt-1 text-xs" style={{ color: colors.textPrimary }}>
+                                {shortenValue(verification.random_seed)}
+                            </AppText>
+                            <AppText className="mt-3 text-xs" style={{ color: colors.textSecondary }}>
+                                Verification Hash
+                            </AppText>
+                            <AppText className="mt-1 text-xs" style={{ color: colors.textPrimary }}>
+                                {shortenValue(verification.verification_hash)}
+                            </AppText>
+                        </View>
+                    </>
+                ) : null}
+
+                {!drawId ? (
+                    <Pressable
+                        onPress={() => router.push('/draws/history')}
+                        className="mt-4 flex-row items-center justify-center rounded-xl px-4 py-3"
+                        style={{ backgroundColor: colors.accent }}
+                    >
+                        <Ionicons name="time-outline" size={16} color="#FFFFFF" />
+                        <AppText color="#FFFFFF" className="ml-2 font-semibold">
+                            Go To All Distributions
+                        </AppText>
+                    </Pressable>
+                ) : null}
+
+                {drawCode ? (
+                    <AppText className="mt-4 text-center text-xs" style={{ color: colors.textSecondary }}>
+                        Requested from draw: {drawCode}
+                    </AppText>
+                ) : null}
             </ScrollView>
         </Screen>
     );

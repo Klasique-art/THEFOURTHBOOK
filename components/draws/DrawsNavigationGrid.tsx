@@ -27,14 +27,6 @@ const DrawsNavigationGrid = () => {
             icon: 'person',
             color: colors.accent,
             route: '/draws/my-status' // Placeholder route
-        },
-        {
-            id: 'fairness',
-            label: 'Verify Fairness',
-            description: 'Rigged? Check our fairness proof',
-            icon: 'shield-checkmark',
-            color: colors.success,
-            route: '/draws/fairness' // Placeholder route
         }
     ] as const;
 
