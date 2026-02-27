@@ -9,20 +9,31 @@ import { useColors } from '@/config';
 import AppText from '@/components/ui/AppText';
 
 interface MembershipProgressCardProps {
-    currentMembers: number;
-    targetMembers: number;
-    isActive: boolean;
+    drawId: string;
+    monthLabel: string;
+    status: string;
+    payoutStatus: string;
+    lotteryType: string;
+    isParticipating: boolean;
+    progressPercentage: number;
+    remainingToTargetLabel: string;
 }
 
 const MembershipProgressCard = ({
-    currentMembers,
-    targetMembers,
-    isActive
+    drawId,
+    monthLabel,
+    status,
+    payoutStatus,
+    lotteryType,
+    isParticipating,
+    progressPercentage,
+    remainingToTargetLabel,
 }: MembershipProgressCardProps) => {
     const colors = useColors();
     const { t } = useTranslation();
-    const progress = (currentMembers / targetMembers) * 100;
-    const membersNeeded = targetMembers - currentMembers;
+    const statusText = status.replace('_', ' ').toUpperCase();
+    const payoutText = payoutStatus.replace('_', ' ').toUpperCase();
+    const lotteryText = lotteryType.charAt(0).toUpperCase() + lotteryType.slice(1);
 
     return (
         <LinearGradient
@@ -38,80 +49,55 @@ const MembershipProgressCard = ({
                         className="w-10 h-10 rounded-full items-center justify-center mr-3"
                         style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
                     >
-                        <Ionicons name="people" size={20} color="#FFFFFF" />
+                        <Ionicons name="calendar" size={20} color="#FFFFFF" />
                     </View>
                     <AppText className="text-lg font-bold" color={colors.white}>
-                        Our Community Growth
+                        Current Draw
                     </AppText>
                 </View>
-                {isActive && (
-                    <View className="bg-green-500 px-3 py-1 rounded-full">
-                        <AppText className="text-xs font-bold" color={colors.white}>ACTIVE</AppText>
-                    </View>
-                )}
+                <View className="bg-white/20 px-3 py-1 rounded-full">
+                    <AppText className="text-xs font-bold" color={colors.white}>{statusText}</AppText>
+                </View>
             </View>
 
             <View className="mb-4">
                 <View className="flex-row items-end justify-between mb-2">
                     <AppText className=" text-4xl font-bold" color={colors.white}>
-                        {currentMembers.toLocaleString()}
+                        {monthLabel}
                     </AppText>
                     <AppText className="text-base mb-1" color={colors.white}>
-                        / {targetMembers.toLocaleString()}
+                        {drawId}
                     </AppText>
                 </View>
                 <AppText className="text-sm" color={colors.white}>
-                    Members Strong & Growing
+                    {lotteryText} draw
+                </AppText>
+                <AppText className="text-xs mt-1" color={colors.white}>
+                    {progressPercentage.toFixed(2)}% to target
                 </AppText>
             </View>
 
-            <View className="mb-4">
-                <View
-                    className="h-3 rounded-full overflow-hidden"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                >
-                    <View
-                        className="h-full rounded-full"
-                        style={{
-                            width: `${Math.min(progress, 100)}%`,
-                            backgroundColor: colors.accent
-                        }}
-                    />
+            <View
+                className="rounded-xl p-3"
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+            >
+                <View className="">
+                    <View className="flex-row items-center">
+                        <Ionicons name="cash-outline" size={16} color={colors.white} />
+                        <AppText className="text-xs ml-2 flex-1" color={colors.white}>
+                            {t('Payout Status: {{status}}', { status: payoutText })}
+                        </AppText>
+                    </View>
+                    <View className={`px-2 py-1 rounded-full ${isParticipating ? 'bg-green-500/80' : 'bg-yellow-500/80'}`}>
+                        <AppText className="text-[10px] font-bold" color={colors.white}>
+                            {isParticipating ? 'PARTICIPATING' : 'NOT JOINED'}
+                        </AppText>
+                    </View>
                 </View>
-                <AppText className=" text-xs mt-2" color={colors.white}>
-                    {progress.toFixed(1)}% Complete
+                <AppText className="text-xs mt-2" color={colors.white}>
+                    {t('Remaining to target: {{amount}}', { amount: remainingToTargetLabel })}
                 </AppText>
             </View>
-
-            {!isActive && (
-                <View
-                    className="rounded-xl p-3"
-                    style={{ backgroundColor: 'rgba(248, 183, 53, 0.2)' }}
-                >
-                    <View className="flex-row items-center">
-                        <Ionicons name="information-circle" size={16} color={colors.warning} />
-                        <AppText className=" text-xs ml-2 flex-1" color={colors.white}>
-                            {t("We're almost there! Just {{membersNeeded}} more members until we accelerate threshold-based distributions together!", {
-                                membersNeeded: membersNeeded.toLocaleString()
-                            })}
-                        </AppText>
-                    </View>
-                </View>
-            )}
-
-            {isActive && (
-                <View
-                    className="rounded-xl p-3"
-                    style={{ backgroundColor: 'rgba(26, 118, 13, 0.3)' }}
-                >
-                    <View className="flex-row items-center">
-                        <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                        <AppText className=" text-xs ml-2 flex-1">
-                            {t('We did it! Our community unlocked faster threshold-triggered distributions!')}
-                        </AppText>
-                    </View>
-                </View>
-            )}
         </LinearGradient>
     );
 };

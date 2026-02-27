@@ -47,7 +47,11 @@ const ThresholdGameScreen = () => {
         const loadGame = async () => {
             try {
                 const cycle = await thresholdGameService.getCurrentCycle();
-                if (!cycle.game.game_id) {
+                if (cycle.distribution_state !== 'threshold_met_game_open') {
+                    throw new Error('Threshold game is not open right now.');
+                }
+
+                if (!cycle.game.exists || !cycle.game.game_id) {
                     throw new Error('No active threshold game right now.');
                 }
 
@@ -56,9 +60,14 @@ const ThresholdGameScreen = () => {
                     return;
                 }
 
+                const submission = await thresholdGameService.getMySubmission(response.game_id);
+                if (!mounted) {
+                    return;
+                }
+
                 setGame(response);
-                setSelectedOptionId(response.submission.selected_option_id);
-                setSubmittedAt(response.submission.submitted_at);
+                setSelectedOptionId(submission.selected_option_id ?? response.submission.selected_option_id);
+                setSubmittedAt(submission.submitted_at ?? response.submission.submitted_at);
             } catch (err) {
                 if (mounted) {
                     setError(err instanceof Error ? err.message : 'Could not load game.');

@@ -23,6 +23,9 @@ const StatCard = ({ icon, label, value, trend }: StatCardProps) => {
         <View
             className="flex-1 rounded-xl p-4"
             style={{ backgroundColor: colors.backgroundAlt }}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={`${label}: ${value}`}
         >
             <View
                 className="w-10 h-10 rounded-full items-center justify-center mb-3"
@@ -67,17 +70,19 @@ const StatCard = ({ icon, label, value, trend }: StatCardProps) => {
 };
 
 interface QuickStatsGridProps {
-    totalContributions: string;
-    yourContributions: number;
-    totalWinners: number;
-    distributionTrigger: string;
+    totalPool: string;
+    participantsCount: number;
+    prizePerWinner: string;
+    numberOfWinners: number;
+    cycleCloseLabel: string;
 }
 
 const QuickStatsGrid = ({
-    totalContributions,
-    yourContributions,
-    totalWinners,
-    distributionTrigger
+    totalPool,
+    participantsCount,
+    prizePerWinner,
+    numberOfWinners,
+    cycleCloseLabel,
 }: QuickStatsGridProps) => {
     return (
         <View className="mb-6">
@@ -89,26 +94,25 @@ const QuickStatsGrid = ({
                 <StatCard
                     icon="cash-outline"
                     label="Total Pool"
-                    value={totalContributions}
-                    trend={{ direction: 'up', percentage: '+12%' }}
+                    value={totalPool}
                 />
                 <StatCard
-                    icon="wallet-outline"
-                    label="Your Contributions"
-                    value={yourContributions.toString()}
+                    icon="people-outline"
+                    label="Participants"
+                    value={participantsCount.toLocaleString('en-US')}
                 />
             </View>
 
             <View className="flex-row gap-3">
                 <StatCard
                     icon="trophy-outline"
-                    label="Total Winners"
-                    value={totalWinners.toString()}
+                    label={`Prize / Winner (${numberOfWinners} slots)`}
+                    value={prizePerWinner}
                 />
                 <StatCard
                     icon="calendar-outline"
-                    label="Trigger Threshold"
-                    value={distributionTrigger}
+                    label="Cycle Closes"
+                    value={cycleCloseLabel}
                 />
             </View>
         </View>

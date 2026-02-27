@@ -13,7 +13,9 @@ import {
 } from '@/components/wallet';
 import { Contribution, PaymentMethod } from '@/data/contributions.dummy';
 import { paymentService } from '@/lib/services/paymentService';
+import { thresholdGameService } from '@/lib/services/thresholdGameService';
 import { ApiPaymentMethod, PaymentHistoryItem } from '@/types/payment.types';
+import { DistributionState } from '@/types/threshold-game.types';
 
 const extractFirstErrorText = (value: unknown): string | null => {
     if (typeof value === 'string' && value.trim().length > 0) return value.trim();
@@ -56,6 +58,8 @@ export default function WalletScreen() {
     const [nextDueDate, setNextDueDate] = useState<string>(new Date().toISOString());
     const [transactions, setTransactions] = useState<Contribution[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [canPayNow, setCanPayNow] = useState(true);
+    const [payDisabledReason, setPayDisabledReason] = useState<string | null>(null);
     const [statusModal, setStatusModal] = useState<{
         visible: boolean;
         title: string;
@@ -69,6 +73,20 @@ export default function WalletScreen() {
     });
 
     const currentMonthAmount = 20.00;
+
+    const stateToReason = (state: DistributionState): string | null => {
+        if (state === 'collecting') return null;
+        if (state === 'threshold_met_game_pending' || state === 'threshold_met_game_open' || state === 'threshold_met_game_closed') {
+            return 'Contributions are closed. Cycle target has been reached and threshold game/distribution steps are in progress.';
+        }
+        if (state === 'distribution_processing') {
+            return 'Contributions are paused while distribution is being processed.';
+        }
+        if (state === 'distribution_completed') {
+            return 'This cycle is completed. Contributions will reopen for the next cycle.';
+        }
+        return 'Contributions are currently unavailable for this cycle.';
+    };
 
     const paymentStatus: 'paid' | 'unpaid' | 'processing' = useMemo(() => {
         if (isProcessing) return 'processing';
@@ -142,10 +160,11 @@ export default function WalletScreen() {
 
     const loadWalletData = useCallback(async () => {
         try {
-            const [status, apiMethods, history] = await Promise.all([
+            const [status, apiMethods, history, cycle] = await Promise.all([
                 paymentService.getCurrentMonthStatus(),
                 paymentService.getPaymentMethods(),
                 paymentService.getPaymentHistory(),
+                thresholdGameService.getCurrentCycle(),
             ]);
 
             const mappedMethods = apiMethods.map(toWalletMethod);
@@ -161,8 +180,14 @@ export default function WalletScreen() {
             setNextDueDate(resolvedDueDate);
 
             setTransactions(history.map(toContribution).slice(0, 20));
+            const reason = stateToReason(cycle.distribution_state);
+            setCanPayNow(!reason);
+            setPayDisabledReason(reason);
         } catch (error: any) {
             openStatusModal('Wallet Error', getErrorMessage(error, 'Could not load wallet data.'), 'error');
+            // Fail-safe to avoid payment loopholes when cycle state is unknown.
+            setCanPayNow(false);
+            setPayDisabledReason('Could not verify if contributions are open. Please try again shortly.');
         }
     }, []);
 
@@ -171,6 +196,11 @@ export default function WalletScreen() {
     }, [loadWalletData]);
 
     const handlePayNow = async () => {
+        if (!canPayNow) {
+            openStatusModal('Contributions Closed', payDisabledReason ?? 'Contributions are currently unavailable for this cycle.', 'info');
+            return;
+        }
+
         setIsProcessing(true);
         try {
             const appReturnUrl = Linking.createURL('payments/callback');
@@ -263,6 +293,8 @@ export default function WalletScreen() {
                         nextDueDate={nextDueDate}
                         onPayPress={handlePayNow}
                         isProcessing={isProcessing}
+                        canPayNow={canPayNow}
+                        payDisabledReason={payDisabledReason}
                     />
 
                     <PaymentMethodList

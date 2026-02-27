@@ -1,17 +1,17 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { ActivityIndicator, ScrollView, View } from 'react-native';
 
 import { Screen } from '@/components';
 import {
-    CurrentCycleBanner,
     DrawsNavigationGrid,
     LatestDistributionCard
 } from '@/components/draws';
 import AppText from '@/components/ui/AppText';
 import { useColors } from '@/config';
 import { DistributionCycle, mockDistributionCycles } from '@/data/dummy.draws';
-import { APP_CONFIG } from '@/data/static.home';
 import { distributionService } from '@/lib/services/distributionService';
 
 export default function DrawsScreen() {
@@ -19,7 +19,6 @@ export default function DrawsScreen() {
     const colors = useColors();
     const [isLoading, setIsLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
-    const [currentPool, setCurrentPool] = React.useState(0);
     const [totalUsers, setTotalUsers] = React.useState(0);
     const [completedDraws, setCompletedDraws] = React.useState(0);
     const [totalWinners, setTotalWinners] = React.useState(0);
@@ -38,7 +37,6 @@ export default function DrawsScreen() {
                 ]);
 
                 if (!isMounted) return;
-                setCurrentPool(publicStats.platform_stats.total_amount_distributed ?? 0);
                 setTotalUsers(publicStats.platform_stats.total_users ?? 0);
                 setCompletedDraws(publicStats.platform_stats.total_draws_completed ?? 0);
                 setTotalWinners(publicStats.platform_stats.total_winners ?? 0);
@@ -60,7 +58,6 @@ export default function DrawsScreen() {
             } catch (err) {
                 if (!isMounted) return;
                 setError(err instanceof Error ? err.message : 'Could not load draw statistics.');
-                setCurrentPool(0);
                 setTotalUsers(0);
                 setCompletedDraws(0);
                 setTotalWinners(0);
@@ -108,12 +105,29 @@ export default function DrawsScreen() {
                         </View>
                     ) : null}
 
-                    <CurrentCycleBanner
-                        currentPool={currentPool}
-                        threshold={APP_CONFIG.DISTRIBUTION_THRESHOLD}
-                        beneficiariesCount={APP_CONFIG.WINNERS_PER_DRAW}
-                        onPlayGame={() => router.push('/draws/threshold-game' as any)}
-                    />
+                    <LinearGradient
+                        colors={[colors.primary, colors.primary100]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        className="mb-6 mt-2 rounded-2xl p-4"
+                    >
+                        <View className="flex-row items-start justify-between">
+                            <View className="flex-1 pr-3">
+                                <AppText className="text-xs uppercase tracking-wider" color={colors.white}>
+                                    Draw Center
+                                </AppText>
+                                <AppText className="mt-1 text-xl font-bold" color={colors.white}>
+                                    Track Every Cycle In One Place
+                                </AppText>
+                                <AppText className="mt-2 text-xs" color={colors.white}>
+                                    View platform activity, explore latest outcomes, and keep up with distribution progress.
+                                </AppText>
+                            </View>
+                            <View className="rounded-full bg-white/20 p-2">
+                                <Ionicons name="analytics-outline" size={20} color={colors.white} />
+                            </View>
+                        </View>
+                    </LinearGradient>
 
                     <View className="mb-6 flex-row" style={{ gap: 10 }}>
                         <View

@@ -50,10 +50,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
             try {
                 await refreshUser();
-            } catch (error) {
+            } catch (error: any) {
                 console.error('[AuthContext] checkAuth refreshUser failed', error);
-                setHasSession(false);
-                setUser(null);
+                const status = error?.response?.status;
+                if (status === 401 || status === 403) {
+                    setHasSession(false);
+                    setUser(null);
+                }
             }
         } catch (error) {
             console.error('[AuthContext] checkAuth failed', error);

@@ -17,6 +17,7 @@ interface NextDrawCountdownProps {
 const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayGame }: NextDrawCountdownProps) => {
     const colors = useColors();
     const [simulatedPool, setSimulatedPool] = React.useState(currentPool);
+    const [isTestMode, setIsTestMode] = React.useState(false);
     const progressPercent = Math.min((simulatedPool / threshold) * 100, 100);
     const remaining = Math.max(threshold - simulatedPool, 0);
     const prizePerBeneficiary = threshold / beneficiariesCount;
@@ -24,6 +25,11 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
 
     const fillAnim = React.useRef(new Animated.Value(progressPercent)).current;
     const pulseAnim = React.useRef(new Animated.Value(1)).current;
+
+    React.useEffect(() => {
+        if (isTestMode) return;
+        setSimulatedPool(currentPool);
+    }, [currentPool, isTestMode]);
 
     React.useEffect(() => {
         Animated.timing(fillAnim, {
@@ -61,7 +67,13 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
     }, [isThresholdMet, pulseAnim]);
 
     const handleSimulateThreshold = () => {
+        setIsTestMode(true);
         setSimulatedPool(threshold);
+    };
+
+    const handleUseLivePool = () => {
+        setIsTestMode(false);
+        setSimulatedPool(currentPool);
     };
 
     return (
@@ -111,6 +123,16 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
                         fullWidth
                         style={{ marginTop: 12, backgroundColor: colors.primary }}
                     />
+                    {isTestMode && (
+                        <AppButton
+                            title="Back to live pool"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleUseLivePool}
+                            fullWidth
+                            style={{ marginTop: 8, borderColor: colors.white }}
+                        />
+                    )}
                 </Animated.View>
             ) : (
                 <>
@@ -124,6 +146,11 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
                         <AppText className="text-xs mt-1" color={colors.white}>
                             Distribution runs automatically at ${threshold.toLocaleString()}
                         </AppText>
+                        {isTestMode && (
+                            <AppText className="text-xs mt-1" color={colors.white}>
+                                Test mode is active
+                            </AppText>
+                        )}
                     </View>
 
                     <View className="mb-3">
@@ -167,6 +194,16 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
                         fullWidth
                         style={{ marginTop: 12, borderColor: colors.white }}
                     />
+                    {isTestMode && (
+                        <AppButton
+                            title="Back to live pool"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleUseLivePool}
+                            fullWidth
+                            style={{ marginTop: 8, borderColor: colors.white }}
+                        />
+                    )}
                 </>
             )}
         </LinearGradient>

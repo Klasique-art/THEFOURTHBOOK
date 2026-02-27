@@ -12,9 +12,19 @@ interface PaymentStatusCardProps {
     nextDueDate: string;
     onPayPress: () => void;
     isProcessing?: boolean;
+    canPayNow?: boolean;
+    payDisabledReason?: string | null;
 }
 
-const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessing }: PaymentStatusCardProps) => {
+const PaymentStatusCard = ({
+    status,
+    amount,
+    nextDueDate,
+    onPayPress,
+    isProcessing,
+    canPayNow = true,
+    payDisabledReason,
+}: PaymentStatusCardProps) => {
     const colors = useColors();
     const isPaid = status === 'paid';
 
@@ -64,7 +74,7 @@ const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessi
                     </AppText>
                 </View>
 
-                {!isPaid && (
+                {!isPaid && canPayNow && (
                     <TouchableOpacity
                         onPress={onPayPress}
                         disabled={isProcessing}
@@ -82,6 +92,13 @@ const PaymentStatusCard = ({ status, amount, nextDueDate, onPayPress, isProcessi
                             </>
                         )}
                     </TouchableOpacity>
+                )}
+                {!isPaid && !canPayNow && (
+                    <View className="max-w-[55%]">
+                        <AppText className="text-xs font-semibold text-right">
+                            {payDisabledReason ?? 'Contributions are currently closed for this cycle.'}
+                        </AppText>
+                    </View>
                 )}
             </View>
         </LinearGradient>

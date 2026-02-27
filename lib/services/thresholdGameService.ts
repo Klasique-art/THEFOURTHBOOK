@@ -1,5 +1,4 @@
-import { mockCurrentUser } from '@/data/userData.dummy';
-import { mockActiveDistributionGame, mockDistributionCycleCurrent } from '@/data/thresholdGame.dummy';
+import client from '@/lib/client';
 import {
     DistributionCycleCurrentResponse,
     DistributionGameActiveResponse,
@@ -8,93 +7,81 @@ import {
     SubmitDistributionGameAnswerResponse,
 } from '@/types/threshold-game.types';
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+type Envelope<T> = {
+    success?: boolean;
+    data?: T;
+};
 
-const submissionStore = new Map<string, DistributionGameSubmissionState>();
+const unwrap = <T>(payload: T | Envelope<T>): T => {
+    if (payload && typeof payload === 'object' && 'data' in (payload as Record<string, unknown>)) {
+        const data = (payload as Envelope<T>).data;
+        if (data !== undefined) return data;
+    }
+    return payload as T;
+};
 
-const getDefaultSubmission = (): DistributionGameSubmissionState => ({
-    has_submitted: false,
-    selected_option_id: null,
-    submitted_at: null,
-    locked: false,
-});
+const toApiErrorMessage = (error: any): string => {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+    const detail =
+        data?.message ||
+        data?.detail ||
+        data?.error ||
+        error?.message ||
+        'Request failed.';
+
+    if (status === 409) return 'You already submitted an answer for this game.';
+    if (status === 422) return 'Game is not open for submissions.';
+    if (status === 403) {
+        return 'You are not eligible for this cycle. You need a qualifying contribution/payment in this cycle before you can play the threshold game.';
+    }
+    if (status === 404) return 'No active threshold game found right now.';
+    if (status === 400) return typeof detail === 'string' ? detail : 'Invalid answer payload.';
+    return typeof detail === 'string' ? detail : 'Request failed.';
+};
 
 export const thresholdGameService = {
     async getCurrentCycle(): Promise<DistributionCycleCurrentResponse> {
-        await wait(300);
-        const submission = submissionStore.get(mockCurrentUser.user_id) ?? getDefaultSubmission();
-
-        return {
-            ...mockDistributionCycleCurrent,
-            game: {
-                ...mockDistributionCycleCurrent.game,
-                has_user_submitted: submission.has_submitted,
-            },
-        };
+        const response = await client.get<Envelope<DistributionCycleCurrentResponse> | DistributionCycleCurrentResponse>(
+            '/distribution/cycle/current/'
+        );
+        return unwrap(response.data);
     },
 
     async getActiveGame(cycleId?: string): Promise<DistributionGameActiveResponse> {
-        await wait(450);
-
-        if (cycleId && cycleId !== mockActiveDistributionGame.cycle_id) {
-            throw new Error('No active game found for this cycle.');
+        try {
+            const query = cycleId ? `?cycle_id=${encodeURIComponent(cycleId)}` : '';
+            const response = await client.get<Envelope<DistributionGameActiveResponse> | DistributionGameActiveResponse>(
+                `/distribution-games/active/${query}`
+            );
+            return unwrap(response.data);
+        } catch (error: any) {
+            throw new Error(toApiErrorMessage(error));
         }
-
-        const submission = submissionStore.get(mockCurrentUser.user_id) ?? getDefaultSubmission();
-
-        return {
-            ...mockActiveDistributionGame,
-            submission,
-        };
     },
 
     async submitAnswer(
         gameId: string,
         payload: SubmitDistributionGameAnswerPayload
     ): Promise<SubmitDistributionGameAnswerResponse> {
-        await wait(500);
-
-        if (gameId !== mockActiveDistributionGame.game_id) {
-            throw new Error('Game not found.');
+        try {
+            const response = await client.post<
+                Envelope<SubmitDistributionGameAnswerResponse> | SubmitDistributionGameAnswerResponse
+            >(`/distribution-games/${gameId}/submissions/`, payload);
+            return unwrap(response.data);
+        } catch (error: any) {
+            throw new Error(toApiErrorMessage(error));
         }
-
-        const existing = submissionStore.get(mockCurrentUser.user_id);
-        if (existing?.has_submitted) {
-            throw new Error('You already submitted an answer for this game.');
-        }
-
-        const optionExists = mockActiveDistributionGame.options.some(
-            (option) => option.option_id === payload.selected_option_id
-        );
-        if (!optionExists) {
-            throw new Error('Invalid option selected.');
-        }
-
-        const submittedAt = new Date().toISOString();
-        submissionStore.set(mockCurrentUser.user_id, {
-            has_submitted: true,
-            selected_option_id: payload.selected_option_id,
-            submitted_at: submittedAt,
-            locked: true,
-        });
-
-        return {
-            submission_id: `sub_${Date.now()}`,
-            game_id: gameId,
-            member_id: mockCurrentUser.user_id,
-            selected_option_id: payload.selected_option_id,
-            submitted_at: submittedAt,
-            locked: true,
-        };
     },
 
     async getMySubmission(gameId: string): Promise<DistributionGameSubmissionState> {
-        await wait(250);
-
-        if (gameId !== mockActiveDistributionGame.game_id) {
-            throw new Error('Game not found.');
+        try {
+            const response = await client.get<
+                Envelope<DistributionGameSubmissionState> | DistributionGameSubmissionState
+            >(`/distribution-games/${gameId}/my-submission/`);
+            return unwrap(response.data);
+        } catch (error: any) {
+            throw new Error(toApiErrorMessage(error));
         }
-
-        return submissionStore.get(mockCurrentUser.user_id) ?? getDefaultSubmission();
     },
 };
