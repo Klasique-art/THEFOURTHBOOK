@@ -9,13 +9,18 @@ import { useColors } from '@/config';
 import { fairnessService } from '@/lib/services/fairnessService';
 import { DrawVerificationData } from '@/types/fairness.types';
 
-const toPeriod = (month: string) => {
+const toPeriod = (month: string | null | undefined) => {
+    if (!month) return 'Unknown period';
     const [year, monthNum] = month.split('-');
     const date = new Date(Number(year), Number(monthNum) - 1, 1);
+    if (Number.isNaN(date.getTime())) return month;
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 };
 
-const shortenValue = (value: string) => (value.length > 48 ? `${value.slice(0, 24)}...${value.slice(-24)}` : value);
+const shortenValue = (value: string | null | undefined) => {
+    if (!value) return 'Not provided';
+    return value.length > 48 ? `${value.slice(0, 24)}...${value.slice(-24)}` : value;
+};
 
 const FairnessScreen = () => {
     const colors = useColors();
@@ -105,10 +110,10 @@ const FairnessScreen = () => {
                                 Period: {toPeriod(verification.month)}
                             </AppText>
                             <AppText className="mt-1 text-sm" style={{ color: colors.textSecondary }}>
-                                Participants: {verification.participants_count.toLocaleString()}
+                                Participants: {(verification.participants_count ?? 0).toLocaleString()}
                             </AppText>
                             <AppText className="mt-1 text-sm" style={{ color: colors.textSecondary }}>
-                                Winners: {verification.number_of_winners}
+                                Winners: {verification.number_of_winners ?? 0}
                             </AppText>
                         </View>
 
@@ -120,13 +125,13 @@ const FairnessScreen = () => {
                                 Draw Configuration
                             </AppText>
                             <AppText className="mt-2 text-xs" style={{ color: colors.textSecondary }}>
-                                Total Pool: {verification.total_pool}
+                                Total Pool: {verification.total_pool ?? 'N/A'}
                             </AppText>
                             <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                Prize Per Winner: {verification.prize_per_winner}
+                                Prize Per Winner: {verification.prize_per_winner ?? 'N/A'}
                             </AppText>
                             <AppText className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                                Algorithm: {verification.algorithm}
+                                Algorithm: {verification.algorithm ?? 'N/A'}
                             </AppText>
                         </View>
 

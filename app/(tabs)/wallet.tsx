@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -12,10 +13,13 @@ import {
     TransactionHistoryList,
 } from '@/components/wallet';
 import { Contribution, PaymentMethod } from '@/data/contributions.dummy';
+import { PAYMENT_CALLBACK_URL } from '@/config/settings';
 import { paymentService } from '@/lib/services/paymentService';
 import { thresholdGameService } from '@/lib/services/thresholdGameService';
 import { ApiPaymentMethod, PaymentHistoryItem } from '@/types/payment.types';
 import { DistributionState } from '@/types/threshold-game.types';
+
+const PENDING_PAYMENT_REFERENCE_KEY = 'thefourthbook_pending_payment_reference';
 
 const extractFirstErrorText = (value: unknown): string | null => {
     if (typeof value === 'string' && value.trim().length > 0) return value.trim();
@@ -203,15 +207,20 @@ export default function WalletScreen() {
 
         setIsProcessing(true);
         try {
-            const appReturnUrl = Linking.createURL('payments/callback');
+            const appReturnUrl = PAYMENT_CALLBACK_URL || Linking.createURL('payments/callback');
+            const callbackUrlForBackend = /^https?:\/\//i.test(appReturnUrl) ? appReturnUrl : undefined;
             console.log(`[Wallet] app return URL (for browser session): ${appReturnUrl}`);
-            console.log('[Wallet] callback_url omitted for backend initialize (optional field)');
+            if (!callbackUrlForBackend) {
+                console.log('[Wallet] callback_url not sent to backend because it is not an http/https URL.');
+            }
             const now = new Date();
             const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             const primaryPayload = {
                 payment_method_id: selectedMethodId ? Number(selectedMethodId) : undefined,
                 auto_renew: isAutoRenewalEnabled,
                 month,
+                callback_url: callbackUrlForBackend,
+                amount: currentMonthAmount,
             };
             console.log(`[Wallet] initialize payload (primary): ${JSON.stringify(primaryPayload)}`);
 
@@ -224,28 +233,49 @@ export default function WalletScreen() {
                 // Backend currently throws TypeError for some optional fields in initialize.
                 const fallbackPayload = {
                     auto_renew: isAutoRenewalEnabled,
+                    callback_url: callbackUrlForBackend,
+                    amount: currentMonthAmount,
                 };
                 console.log(`[Wallet] initialize payload (fallback): ${JSON.stringify(fallbackPayload)}`);
                 initialized = await paymentService.initializeMonthlyPayment(fallbackPayload);
             }
+
+            const initializedAmount = Number(initialized.amount);
+            if (!Number.isFinite(initializedAmount) || initializedAmount !== currentMonthAmount) {
+                openStatusModal(
+                    'Amount Mismatch',
+                    `Payment was initialized for $${Number.isFinite(initializedAmount) ? initializedAmount : 'N/A'} instead of $${currentMonthAmount}. Checkout was stopped for your safety. Please contact support/backend to update monthly amount configuration.`,
+                    'error'
+                );
+                return;
+            }
+            await AsyncStorage.setItem(PENDING_PAYMENT_REFERENCE_KEY, initialized.reference);
 
             const checkoutResult = await WebBrowser.openAuthSessionAsync(
                 initialized.authorization_url,
                 appReturnUrl
             );
 
-            if (checkoutResult.type === 'cancel') {
-                openStatusModal(
-                    'Payment Cancelled',
-                    'You cancelled checkout before payment was completed.',
-                    'info'
-                );
-                return;
-            }
+            const tryVerify = async () => {
+                await paymentService.verifyPayment(initialized.reference);
+                await AsyncStorage.removeItem(PENDING_PAYMENT_REFERENCE_KEY);
+                await loadWalletData();
+                openStatusModal('Success', 'Your contribution for this month has been received!', 'success');
+            };
 
-            await paymentService.verifyPayment(initialized.reference);
-            await loadWalletData();
-            openStatusModal('Success', 'Your contribution for this month has been received!', 'success');
+            try {
+                await tryVerify();
+            } catch {
+                if (checkoutResult.type === 'cancel') {
+                    openStatusModal(
+                        'Payment Not Confirmed Yet',
+                        'Checkout was closed before callback. If you completed payment, open Wallet again in a few seconds to refresh verification.',
+                        'info'
+                    );
+                    return;
+                }
+                throw new Error('Payment could not be confirmed yet.');
+            }
         } catch (error: any) {
             openStatusModal('Payment Failed', getErrorMessage(error, 'Payment could not be completed.'), 'error');
         } finally {

@@ -48,7 +48,7 @@ const DrawBeneficiariesScreen = () => {
                 if (!isMounted) return;
                 setCycle(response.cycle);
                 setDrawInternalId(response.draw_internal_id);
-                setBeneficiaries(response.beneficiaries);
+                setBeneficiaries(Array.isArray(response.beneficiaries) ? response.beneficiaries : []);
             } catch (err) {
                 if (!isMounted) return;
                 setError(err instanceof Error ? err.message : 'Could not load beneficiaries.');
@@ -122,7 +122,7 @@ const DrawBeneficiariesScreen = () => {
                         </View>
                     )}
 
-                    {beneficiaries.map((member) => (
+                    {(Array.isArray(beneficiaries) ? beneficiaries : []).map((member) => (
                         <View
                             key={member.winner_id}
                             className="mb-3 rounded-2xl border p-4"
@@ -152,7 +152,7 @@ const DrawBeneficiariesScreen = () => {
                             <View className="mt-1 flex-row items-center">
                                 <Ionicons name="time-outline" size={16} color={colors.textSecondary} />
                                 <AppText className="ml-2 text-xs" style={{ color: colors.textSecondary }}>
-                                    Selected: {new Date(member.selected_at).toLocaleString('en-US')}
+                                    Selected: {member.selected_at ? new Date(member.selected_at).toLocaleString('en-US') : 'N/A'}
                                 </AppText>
                             </View>
                         </View>

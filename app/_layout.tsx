@@ -21,6 +21,7 @@ export default function RootLayout() {
                 <Stack.Screen name="onboarding" />
                 <Stack.Screen name="verification" />
                 <Stack.Screen name="terms" />
+                <Stack.Screen name="payments/callback" />
                 <Stack.Screen name="(tabs)" />
               </Stack>
             </ToastProvider>
