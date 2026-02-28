@@ -38,7 +38,8 @@ export const paymentService = {
         auto_renew?: boolean;
         month?: string;
         callback_url?: string;
-        amount?: number;
+        currency?: string;
+        allow_currency_fallback?: boolean;
     }): Promise<InitializePaymentResponseData> {
         const response = await client.post<ApiEnvelope<InitializePaymentResponseData>>(
             '/payments/monthly/initialize/',

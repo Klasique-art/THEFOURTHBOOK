@@ -16,7 +16,9 @@ export interface ApiPaymentMethod {
 
 export interface InitializePaymentResponseData {
     payment_id: string;
-    amount: number;
+    amount: number | string;
+    currency?: string;
+    exchange_rate?: number | null;
     reference: string;
     authorization_url: string;
     access_code: string;

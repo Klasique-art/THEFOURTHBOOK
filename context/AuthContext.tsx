@@ -11,6 +11,7 @@ interface AuthContextType {
     isLoading: boolean;
     isAuthenticated: boolean;
     login: (credentials: LoginCredentials) => Promise<void>;
+    loginWithGoogle: (idToken: string) => Promise<void>;
     signup: (data: SignupData) => Promise<void>;
     verifySignupCode: (email: string, code: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -91,6 +92,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }, [refreshUser]);
 
+    const loginWithGoogle = useCallback(async (idToken: string) => {
+        await authService.loginWithGoogle(idToken);
+        setHasSession(true);
+
+        try {
+            await refreshUser();
+        } catch (error) {
+            console.error('[AuthContext] loginWithGoogle refreshUser failed', error);
+        }
+    }, [refreshUser]);
+
     const signup = useCallback(async (data: SignupData) => {
         try {
             await authService.signup(data);
@@ -138,6 +150,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 isLoading,
                 isAuthenticated: hasSession,
                 login,
+                loginWithGoogle,
                 signup,
                 verifySignupCode,
                 logout,

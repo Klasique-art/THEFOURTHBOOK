@@ -14,6 +14,7 @@ interface PaymentStatusCardProps {
     isProcessing?: boolean;
     canPayNow?: boolean;
     payDisabledReason?: string | null;
+    checkoutQuoteLabel?: string | null;
 }
 
 const PaymentStatusCard = ({
@@ -24,6 +25,7 @@ const PaymentStatusCard = ({
     isProcessing,
     canPayNow = true,
     payDisabledReason,
+    checkoutQuoteLabel,
 }: PaymentStatusCardProps) => {
     const colors = useColors();
     const isPaid = status === 'paid';
@@ -63,6 +65,11 @@ const PaymentStatusCard = ({
                 </AppText>
                 <AppText className="text-lg mb-1 font-medium">/ month</AppText>
             </View>
+            {checkoutQuoteLabel ? (
+                <AppText className="text-xs mb-4" color="#FFFFFF">
+                    {checkoutQuoteLabel}
+                </AppText>
+            ) : null}
 
             <View className="flex-row justify-between items-center">
                 <View>

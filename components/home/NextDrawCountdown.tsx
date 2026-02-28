@@ -185,6 +185,7 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
                         </AppText>
                     </View>
 
+                    {/*
                     <AppButton
                         title="Test: hit $1M now"
                         variant="outline"
@@ -194,6 +195,7 @@ const NextDrawCountdown = ({ currentPool, threshold, beneficiariesCount, onPlayG
                         fullWidth
                         style={{ marginTop: 12, borderColor: colors.white }}
                     />
+                    */}
                     {isTestMode && (
                         <AppButton
                             title="Back to live pool"

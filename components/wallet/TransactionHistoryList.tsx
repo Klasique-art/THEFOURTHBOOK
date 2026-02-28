@@ -13,6 +13,19 @@ interface TransactionHistoryListProps {
 
 const TransactionHistoryList = ({ transactions }: TransactionHistoryListProps) => {
     const colors = useColors();
+    const formatMoney = (amount: number, currency?: string) => {
+        const normalized = (currency || 'USD').toUpperCase();
+        try {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: normalized,
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }).format(amount);
+        } catch {
+            return `${normalized} ${amount.toFixed(2)}`;
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -88,7 +101,7 @@ const TransactionHistoryList = ({ transactions }: TransactionHistoryListProps) =
                                 className="font-bold text-base"
                                 style={{ color: txn.type === 'adjustment' || txn.status === 'failed' ? colors.textSecondary : colors.textPrimary }}
                             >
-                                {txn.status === 'refunded' ? '+' : '-'}${txn.amount.toFixed(2)}
+                                {txn.status === 'refunded' ? '+' : '-'}{formatMoney(txn.amount, txn.currency)}
                             </AppText>
                             <AppText
                                 style={{ color: getStatusColor(txn.status), fontSize: 11, fontWeight: '600', textTransform: 'capitalize' }}

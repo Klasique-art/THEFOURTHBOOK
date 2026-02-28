@@ -1,7 +1,13 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import * as Crypto from 'expo-crypto';
+import { Platform } from 'react-native';
+
 import { authStorage } from '@/lib/auth';
 import client from '@/lib/client';
 import { CurrentUser } from '@/types/user.types';
 import {
+    GoogleLoginRequest,
     LoginRequest,
     LoginResponse,
     SignupRequest,
@@ -11,6 +17,29 @@ import {
     VerifySignupCodeRequest,
     VerifySignupCodeResponse,
 } from '@/types/auth.types';
+
+const DEVICE_ID_STORAGE_KEY = 'thefourthbook_device_id';
+
+const resolveDeviceId = async () => {
+    const existing = await AsyncStorage.getItem(DEVICE_ID_STORAGE_KEY);
+    if (existing) return existing;
+    const generated =
+        typeof (Crypto as any).randomUUID === 'function'
+            ? (Crypto as any).randomUUID()
+            : `dev_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    await AsyncStorage.setItem(DEVICE_ID_STORAGE_KEY, generated);
+    return generated;
+};
+
+const buildDeviceInfo = async (): Promise<GoogleLoginRequest['device_info']> => {
+    const deviceId = await resolveDeviceId();
+    return {
+        device_id: deviceId,
+        device_name: Constants.deviceName || Platform.OS,
+        platform: Platform.OS,
+        app_version: Constants.expoConfig?.version || '1.0.0',
+    };
+};
 
 const toErrorPreview = (data: unknown): string | unknown => {
     const truncateToWords = (input: string, maxWords = 500) => {
@@ -156,6 +185,58 @@ export const authService = {
         }
     },
 
+    async loginWithGoogle(idToken: string): Promise<LoginResponse> {
+        try {
+            const deviceInfo = await buildDeviceInfo();
+            const response = await client.post('/auth/google/', {
+                id_token: idToken,
+                device_info: deviceInfo,
+            });
+            const responseData = response.data;
+
+            const access = extractToken(responseData, [
+                'access',
+                'tokens.access',
+                'data.access',
+                'data.tokens.access',
+            ]);
+            const refresh = extractToken(responseData, [
+                'refresh',
+                'tokens.refresh',
+                'data.refresh',
+                'data.tokens.refresh',
+            ]);
+
+            const sessionId = extractToken(responseData, [
+                'session_id',
+                'session.id',
+                'data.session_id',
+                'data.session.session_id',
+                'data.session.id',
+            ]);
+
+            if (!access || !refresh) {
+                throw new Error(
+                    `Google login response missing token strings. Payload preview: ${
+                        typeof responseData === 'string'
+                            ? responseData.slice(0, 500)
+                            : JSON.stringify(responseData).slice(0, 500)
+                    }`
+                );
+            }
+
+            await authStorage.setTokens(access, refresh);
+            if (sessionId) {
+                await authStorage.setSessionId(sessionId);
+            }
+
+            return { access, refresh };
+        } catch (error) {
+            logApiError('loginWithGoogle', error);
+            throw error;
+        }
+    },
+
     async getCurrentUser(): Promise<CurrentUser> {
         try {
             const response = await client.get<{ success: boolean; data: CurrentUser }>('/users/profile/');
@@ -167,11 +248,22 @@ export const authService = {
     },
 
     async logout(): Promise<void> {
-        await Promise.all([
-            authStorage.clearTokens(),
-            authStorage.clearPendingSignupCredentials(),
-        ]);
-        authService.pendingSignupCredentials = null;
+        try {
+            const sessionId = await authStorage.getSessionId();
+            if (sessionId) {
+                await client.post('/auth/logout/', { session_id: sessionId });
+            } else {
+                await client.post('/auth/logout/', { logout_all_devices: true });
+            }
+        } catch (error) {
+            logApiError('logout', error);
+        } finally {
+            await Promise.all([
+                authStorage.clearTokens(),
+                authStorage.clearPendingSignupCredentials(),
+            ]);
+            authService.pendingSignupCredentials = null;
+        }
     },
 
     async verifySignupCode(payload: VerifySignupCodeRequest): Promise<VerifySignupCodeResponse> {

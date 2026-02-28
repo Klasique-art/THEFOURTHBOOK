@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 
 export const AUTH_TOKEN_KEY = 'thefourthbook_auth_token';
 export const REFRESH_TOKEN_KEY = 'thefourthbook_refresh_token';
+export const AUTH_SESSION_ID_KEY = 'thefourthbook_auth_session_id';
 export const PENDING_SIGNUP_EMAIL_KEY = 'thefourthbook_pending_signup_email';
 export const PENDING_SIGNUP_PASSWORD_KEY = 'thefourthbook_pending_signup_password';
 
@@ -29,7 +30,16 @@ export const authStorage = {
         await Promise.all([
             SecureStore.deleteItemAsync(AUTH_TOKEN_KEY),
             SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+            SecureStore.deleteItemAsync(AUTH_SESSION_ID_KEY),
         ]);
+    },
+
+    async setSessionId(sessionId: string): Promise<void> {
+        await SecureStore.setItemAsync(AUTH_SESSION_ID_KEY, sessionId);
+    },
+
+    async getSessionId(): Promise<string | null> {
+        return SecureStore.getItemAsync(AUTH_SESSION_ID_KEY);
     },
 
     async setPendingSignupCredentials(email: string, password: string): Promise<void> {

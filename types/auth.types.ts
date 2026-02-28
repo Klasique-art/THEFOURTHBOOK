@@ -37,3 +37,13 @@ export type ResendVerificationCodeRequest = {
 };
 
 export type ResendVerificationCodeResponse = Record<string, unknown>;
+
+export type GoogleLoginRequest = {
+    id_token: string;
+    device_info: {
+        device_id: string;
+        device_name: string;
+        platform: 'android' | 'ios' | 'web' | string;
+        app_version: string;
+    };
+};

@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Linking from 'expo-linking';
+import { getCalendars, getLocales } from 'expo-localization';
+import { useFocusEffect } from '@react-navigation/native';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -20,6 +22,31 @@ import { ApiPaymentMethod, PaymentHistoryItem } from '@/types/payment.types';
 import { DistributionState } from '@/types/threshold-game.types';
 
 const PENDING_PAYMENT_REFERENCE_KEY = 'thefourthbook_pending_payment_reference';
+const SUPPORTED_CHECKOUT_CURRENCIES = ['GHS', 'KES', 'NGN', 'USD', 'XOF', 'ZAR'] as const;
+const DEFAULT_CHECKOUT_CURRENCY: (typeof SUPPORTED_CHECKOUT_CURRENCIES)[number] = 'USD';
+
+const COUNTRY_TO_SUPPORTED_CURRENCY: Record<string, (typeof SUPPORTED_CHECKOUT_CURRENCIES)[number]> = {
+    GH: 'GHS',
+    KE: 'KES',
+    NG: 'NGN',
+    ZA: 'ZAR',
+    BJ: 'XOF',
+    BF: 'XOF',
+    CI: 'XOF',
+    GW: 'XOF',
+    ML: 'XOF',
+    NE: 'XOF',
+    SN: 'XOF',
+    TG: 'XOF',
+};
+
+const TIMEZONE_TO_SUPPORTED_CURRENCY: Record<string, (typeof SUPPORTED_CHECKOUT_CURRENCIES)[number]> = {
+    'Africa/Accra': 'GHS',
+    'Africa/Lagos': 'NGN',
+    'Africa/Nairobi': 'KES',
+    'Africa/Johannesburg': 'ZAR',
+    'Africa/Abidjan': 'XOF',
+};
 
 const extractFirstErrorText = (value: unknown): string | null => {
     if (typeof value === 'string' && value.trim().length > 0) return value.trim();
@@ -64,6 +91,8 @@ export default function WalletScreen() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [canPayNow, setCanPayNow] = useState(true);
     const [payDisabledReason, setPayDisabledReason] = useState<string | null>(null);
+    const [checkoutCurrency, setCheckoutCurrency] = useState<(typeof SUPPORTED_CHECKOUT_CURRENCIES)[number]>(DEFAULT_CHECKOUT_CURRENCY);
+    const [checkoutQuoteLabel, setCheckoutQuoteLabel] = useState<string | null>(null);
     const [statusModal, setStatusModal] = useState<{
         visible: boolean;
         title: string;
@@ -77,6 +106,29 @@ export default function WalletScreen() {
     });
 
     const currentMonthAmount = 20.00;
+
+    useEffect(() => {
+        const locale = getLocales()?.[0];
+        const timezone = getCalendars()?.[0]?.timeZone;
+        const detectedCurrency = locale?.currencyCode?.toUpperCase?.();
+        const region = locale?.regionCode?.toUpperCase?.();
+
+        let chosen = DEFAULT_CHECKOUT_CURRENCY;
+
+        if (detectedCurrency && SUPPORTED_CHECKOUT_CURRENCIES.includes(detectedCurrency as any)) {
+            chosen = detectedCurrency as (typeof SUPPORTED_CHECKOUT_CURRENCIES)[number];
+        } else if (region && COUNTRY_TO_SUPPORTED_CURRENCY[region]) {
+            chosen = COUNTRY_TO_SUPPORTED_CURRENCY[region];
+        } else if (timezone && TIMEZONE_TO_SUPPORTED_CURRENCY[timezone]) {
+            chosen = TIMEZONE_TO_SUPPORTED_CURRENCY[timezone];
+        }
+
+        console.log(
+            `[Wallet] currency detection :: locale_currency=${detectedCurrency ?? 'n/a'}, region=${region ?? 'n/a'}, timezone=${timezone ?? 'n/a'}, chosen=${chosen}`
+        );
+
+        setCheckoutCurrency(chosen);
+    }, []);
 
     const stateToReason = (state: DistributionState): string | null => {
         if (state === 'collecting') return null;
@@ -199,6 +251,26 @@ export default function WalletScreen() {
         void loadWalletData();
     }, [loadWalletData]);
 
+    const verifyPendingPaymentIfAny = useCallback(async () => {
+        const pendingReference = await AsyncStorage.getItem(PENDING_PAYMENT_REFERENCE_KEY);
+        if (!pendingReference) return;
+
+        try {
+            await paymentService.verifyPayment(pendingReference);
+            await AsyncStorage.removeItem(PENDING_PAYMENT_REFERENCE_KEY);
+            await loadWalletData();
+            openStatusModal('Success', 'Your contribution was confirmed after returning to the app.', 'success');
+        } catch {
+            // Payment may still be processing on provider side; keep pending reference for later retry.
+        }
+    }, [loadWalletData]);
+
+    useFocusEffect(
+        useCallback(() => {
+            void verifyPendingPaymentIfAny();
+        }, [verifyPendingPaymentIfAny])
+    );
+
     const handlePayNow = async () => {
         if (!canPayNow) {
             openStatusModal('Contributions Closed', payDisabledReason ?? 'Contributions are currently unavailable for this cycle.', 'info');
@@ -220,7 +292,8 @@ export default function WalletScreen() {
                 auto_renew: isAutoRenewalEnabled,
                 month,
                 callback_url: callbackUrlForBackend,
-                amount: currentMonthAmount,
+                currency: checkoutCurrency,
+                allow_currency_fallback: false,
             };
             console.log(`[Wallet] initialize payload (primary): ${JSON.stringify(primaryPayload)}`);
 
@@ -234,20 +307,21 @@ export default function WalletScreen() {
                 const fallbackPayload = {
                     auto_renew: isAutoRenewalEnabled,
                     callback_url: callbackUrlForBackend,
-                    amount: currentMonthAmount,
+                    currency: checkoutCurrency,
+                    allow_currency_fallback: false,
                 };
                 console.log(`[Wallet] initialize payload (fallback): ${JSON.stringify(fallbackPayload)}`);
                 initialized = await paymentService.initializeMonthlyPayment(fallbackPayload);
             }
 
             const initializedAmount = Number(initialized.amount);
-            if (!Number.isFinite(initializedAmount) || initializedAmount !== currentMonthAmount) {
-                openStatusModal(
-                    'Amount Mismatch',
-                    `Payment was initialized for $${Number.isFinite(initializedAmount) ? initializedAmount : 'N/A'} instead of $${currentMonthAmount}. Checkout was stopped for your safety. Please contact support/backend to update monthly amount configuration.`,
-                    'error'
-                );
-                return;
+            const initializedCurrency = initialized.currency || checkoutCurrency;
+            const exchangeRate = initialized.exchange_rate;
+            if (Number.isFinite(initializedAmount)) {
+                const quote = `${initializedAmount.toLocaleString('en-US')} ${initializedCurrency}${exchangeRate ? ` (rate: ${exchangeRate})` : ''}`;
+                setCheckoutQuoteLabel(`Checkout quote: ${quote}`);
+            } else {
+                setCheckoutQuoteLabel(`Checkout quote currency: ${initializedCurrency}`);
             }
             await AsyncStorage.setItem(PENDING_PAYMENT_REFERENCE_KEY, initialized.reference);
 
@@ -277,7 +351,19 @@ export default function WalletScreen() {
                 throw new Error('Payment could not be confirmed yet.');
             }
         } catch (error: any) {
-            openStatusModal('Payment Failed', getErrorMessage(error, 'Payment could not be completed.'), 'error');
+            const message = getErrorMessage(error, 'Payment could not be completed.');
+            if (message.toLowerCase().includes('currency') && message.toLowerCase().includes('not enabled')) {
+                if (checkoutCurrency !== DEFAULT_CHECKOUT_CURRENCY) {
+                    setCheckoutCurrency(DEFAULT_CHECKOUT_CURRENCY);
+                }
+                openStatusModal(
+                    'Unsupported Currency',
+                    `The selected currency (${checkoutCurrency}) is not enabled for this merchant. Allowed: ${SUPPORTED_CHECKOUT_CURRENCIES.join(', ')}. Switched to ${DEFAULT_CHECKOUT_CURRENCY}. Please retry payment.`,
+                    'info'
+                );
+                return;
+            }
+            openStatusModal('Payment Failed', message, 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -325,6 +411,7 @@ export default function WalletScreen() {
                         isProcessing={isProcessing}
                         canPayNow={canPayNow}
                         payDisabledReason={payDisabledReason}
+                        checkoutQuoteLabel={checkoutQuoteLabel}
                     />
 
                     <PaymentMethodList

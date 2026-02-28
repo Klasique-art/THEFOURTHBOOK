@@ -81,9 +81,19 @@ const getRefreshedAccessToken = async (): Promise<string> => {
             const refreshToken = await authStorage.getRefreshToken();
             if (!refreshToken) throw new Error('No refresh token found.');
 
-            const response = await axios.post(`${API_BASE_URL}/auth/jwt/refresh/`, {
-                refresh: refreshToken,
-            });
+            let response;
+            try {
+                response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+                    refresh: refreshToken,
+                });
+            } catch (error: any) {
+                if (error?.response?.status && error.response.status !== 404) {
+                    throw error;
+                }
+                response = await axios.post(`${API_BASE_URL}/auth/jwt/refresh/`, {
+                    refresh: refreshToken,
+                });
+            }
 
             const access = (
                 response.data?.tokens?.access ??
